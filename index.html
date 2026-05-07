@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✦ Arcana Whisper ✦ 神谕塔罗</title>
+    <link rel="stylesheet" href="./src/styles.css">
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+<canvas id="auroraCanvas"></canvas>
+<div class="milky-way"></div>
+<div class="nebula-layer nebula-1"></div>
+<div class="nebula-layer nebula-2"></div>
+<div class="horizon-glow"></div>
+<div class="mountain-silhouette">
+    <svg viewBox="0 0 1440 320" preserveAspectRatio="none">
+        <path fill="rgba(3,0,20,0.95)" d="M0,320 L0,280 Q100,220 200,250 Q280,270 350,230 Q420,190 500,210 Q580,230 650,200 Q720,170 800,195 Q880,220 950,180 Q1020,140 1100,170 Q1180,200 1250,175 Q1320,150 1380,190 Q1420,210 1440,200 L1440,320 Z"/>
+        <path fill="rgba(3,0,20,0.7)" d="M0,320 L0,290 Q120,265 250,275 Q380,285 480,260 Q580,235 700,255 Q820,275 920,250 Q1020,225 1140,248 Q1260,270 1350,255 Q1400,248 1440,260 L1440,320 Z"/>
+    </svg>
+</div>
+<div class="vignette"></div>
+<div id="floating-particles"></div>
+
+<div class="app-container">
+    <nav class="top-nav">
+    <div class="nav-left">
+        <span class="nav-brand" onclick="showHome()">✦ ARCANA</span>
+        <a class="nav-link" onclick="showHome()">占卜</a>
+        <a class="nav-link" onclick="showBook()">答案之书</a>
+        <a class="nav-link" onclick="startYesNo()">是非占卜</a>
+        <a class="nav-link" onclick="showEncyclopedia()">图鉴</a>
+        <a class="nav-link" onclick="showHistory()">记录</a>
+    </div>
+    <div class="nav-right">
+        <button class="sound-toggle" id="soundToggle" onclick="toggleSound()" title="氛围音乐">🔇</button>
+    </div>
+</nav>
+
+<!-- 答案之书独立页面 -->
+<section class="page book-page" id="bookPage">
+    <button class="back-btn" onclick="showHome()">← 返回</button>
+    <div class="book-page-hero">
+        <div class="book-page-moon"><div class="book-page-moon-inner">☽</div></div>
+        <h2 class="book-page-title">✦ 答案之书 ✦</h2>
+        <p class="book-page-sub">The Book of Answers</p>
+        <div class="book-page-divider"></div>
+        <p class="book-page-desc">静下心来，心中默念你的问题<br>然后，让命运为你揭晓答案</p>
+    </div>
+    <div class="book-page-ask">
+        <button class="book-page-btn" onclick="bookShowAnswer()">
+            <span class="ring"></span><span class="ring"></span><span class="ring"></span>
+            <span class="btn-icon">✦</span>
+            <span class="btn-text">询问</span>
+        </button>
+        <div class="book-page-hint">闭眼 · 深呼吸 · 默念问题 · 点击按钮</div>
+    </div>
+</section>
+
+    <section class="hero-section" id="homePage">
+        <div class="hero-moon"><div class="hero-moon-inner">☽</div></div>
+        <h1 class="hero-title">
+            <span class="main-title">ARCANA WHISPER</span>
+            <span class="sub-title">神 谕 塔 罗</span>
+        <span class="sub-title" id="moonPhaseDisplay" style="font-size:0.7rem;letter-spacing:3px;margin-top:12px;opacity:0.5;display:block;"></span>
+        </h1>
+        <div class="hero-divider"></div>
+        <p class="hero-description">在无垠的星河之下，古老的智慧正在低语<br>静心聆听，让塔罗揭示命运的织锦</p>
+        <div class="deck-toggle-section">
+    <div class="section-label">选择牌组</div>
+    <div class="deck-toggle">
+        <button class="deck-option active" onclick="setDeck('major')" id="deckMajor">大阿卡纳 · 22张</button>
+        <button class="deck-option" onclick="setDeck('full')" id="deckFull">全牌 · 78张</button>
+    </div>
+</div>
+
+
+<div class="section-label" style="margin-bottom:14px;">选择牌组 / 功能</div>
+<div class="spread-grid">
+            <div class="spread-card" onclick="startReading('single')"><div class="spread-card-icon">✧</div><div class="spread-card-name">每日一卡</div><div class="spread-card-count">1 CARD</div><div class="spread-card-desc">今日灵感指引</div></div>
+            <div class="spread-card" onclick="showThreeSubMenu()"><div class="spread-card-icon">☽ ☀ ☾</div><div class="spread-card-name">三象之镜</div><div class="spread-card-count">3 CARDS</div><div class="spread-card-desc">多种三牌解读可选</div></div>
+            <div class="spread-card" onclick="startReading('cross')"><div class="spread-card-icon">✚</div><div class="spread-card-name">十字牌阵</div><div class="spread-card-count">5 CARDS</div><div class="spread-card-desc">处境 · 障碍 · 建议</div></div>
+            <div class="spread-card" onclick="startReading('relationship')"><div class="spread-card-icon">♡</div><div class="spread-card-name">关系牌阵</div><div class="spread-card-count">5 CARDS</div><div class="spread-card-desc">你 · 对方 · 未来</div></div>
+            <div class="spread-card" onclick="startReading('hexagram')"><div class="spread-card-icon">✡</div><div class="spread-card-name">六芒星阵</div><div class="spread-card-count">7 CARDS</div><div class="spread-card-desc">综合深度分析</div></div>
+            <div class="spread-card" onclick="startReading('celtic')"><div class="spread-card-icon">☸</div><div class="spread-card-name">凯尔特十字</div><div class="spread-card-count">10 CARDS</div><div class="spread-card-desc">最经典的深度解读</div></div>
+        </div>
+        <div class="bottom-ornament">✧ As above, so below ✧</div>
+    </section>
+
+    <section class="page" id="readingPage">
+        <button class="back-btn" onclick="showHome()">← 返回</button>
+        <div class="reading-header"><h2 id="readingTitle"></h2><p id="readingSubtitle"></p></div>
+        <div class="shuffle-controls">
+            <button class="shuffle-btn" onclick="doShuffle()">✦ 洗牌 ✦</button>
+            <div class="shuffle-hint" id="shuffleHint">点击洗牌，准备好后从弧形中选牌</div>
+        </div>
+        <div class="draw-progress" id="drawProgress"></div>
+        <div class="fan-container" id="fanContainer"></div>
+        <div class="spread-area"><div class="spread-container" id="spreadContainer"></div></div>
+        <div class="action-bar" id="actionBar">
+            <button class="action-btn" onclick="resetReading()">重新抽牌</button>
+            <button class="action-btn primary" onclick="showSaveModal()">保存记录</button>
+            <button class="action-btn primary" onclick="showInterp()">✦ 查看解读</button>
+            <button class="action-btn primary" onclick="openAI()">✦ 星谕解读</button>                                                                    
+        </div>
+        <div class="interp-area" id="interpArea"></div>
+    </section>
+
+    <section class="page" id="encyclopediaPage">
+    <button class="back-btn" onclick="showHome()">← 返回</button>
+    <div class="reading-header" style="margin-bottom:20px;">
+        <h2>✦ 塔罗图鉴 ✦</h2>
+        <p>Arcana Encyclopedia · 点击卡牌查看详细解读</p>
+    </div>
+    <div class="ency-filters" id="encyFilters">
+        <button class="ency-filter active" onclick="filterEncy('all')">全部 · 78</button>
+        <button class="ency-filter" onclick="filterEncy('major')">大阿卡纳 · 22</button>
+        <button class="ency-filter" onclick="filterEncy('wands')">权杖 · 14</button>
+        <button class="ency-filter" onclick="filterEncy('cups')">圣杯 · 14</button>
+        <button class="ency-filter" onclick="filterEncy('swords')">宝剑 · 14</button>
+        <button class="ency-filter" onclick="filterEncy('pentacles')">星币 · 14</button>
+    </div>
+    <div class="ency-grid" id="encyGrid"></div>
+</section>
+
+<div class="modal-overlay" id="encyDetailModal">
+    <div class="modal-box" style="max-width:520px;max-height:85vh;overflow-y:auto;text-align:left;padding:28px 24px;">
+        <div id="encyDetailContent"></div>
+        <div class="modal-buttons" style="margin-top:18px;">
+            <button class="action-btn" onclick="closeEncyDetail()">关闭</button>
+        </div>
+    </div>
+</div>
+    <section class="page" id="historyPage">
+        <button class="back-btn" onclick="showHome()">← 返回</button>
+        <h2 style="font-family:'Cinzel',serif;color:var(--gold-light);letter-spacing:4px;margin-bottom:30px;font-size:1.3rem;margin-top:80px;">✦ 占卜记录 ✦</h2>
+        <div class="history-list" id="historyList"></div>
+    </section>
+</div>
+<!-- 答案之书弹窗 -->
+<div class="book-modal-overlay" id="bookModal">
+    <div class="book-modal-glow"></div>
+    <div class="book-modal">
+        <div class="book-modal-stars" id="bookModalStars"></div>
+        <div class="book-modal-shimmer"></div>
+        <button class="book-modal-close" onclick="bookCloseModal()">✕</button>
+        <div class="book-modal-star">✦</div>
+        <div class="book-modal-label">✦ 命运的答案 ✦</div>
+        <div class="book-modal-guide">静下心来，心中默念你的问题<br>答案正在浮现……</div>
+        <div class="book-modal-answer" id="bookModalAnswer"></div>
+        <div class="book-modal-divider"></div>
+        <div class="book-modal-hint">✦ 答案已显现 ✦</div>
+        <button class="book-modal-again" onclick="bookShowAnswer()">再次询问 ↻</button>
+    </div>
+</div>
+<div class="ai-modal" id="aiModal">
+    <div class="ai-header">
+        <div class="ai-header-info">
+            <div class="ai-avatar">☽</div>
+            <div><div class="ai-header-name">星谕</div><div class="ai-header-sub">塔罗灵感向导</div></div>
+        </div>
+        <button class="ai-close" onclick="closeAI()">✕</button>
+    </div>
+    <div class="ai-messages" id="aiMessages"></div>
+    <div class="ai-input-bar">
+        <input type="text" class="ai-input" id="aiInput" placeholder="向星谕提问..." onkeydown="if(event.key==='Enter')sendAI()">
+        <button class="ai-send" id="aiSendBtn" onclick="sendAI()">发送</button>
+    </div>
+</div>
+<div class="modal-overlay" id="yesnoModal">
+    <div class="modal-box" style="max-width:440px;">
+        <h3>✦ 是非占卜 ✦</h3>
+        <p style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:12px;font-weight:300;line-height:1.9;">在心中默念一个<strong style="color:var(--gold-light);">是或否</strong>的问题<br>然后点击下方抽牌</p>
+        <div id="yesnoResult" style="display:none;text-align:center;margin:18px 0;"></div>
+        <div id="yesnoAction" class="modal-buttons" style="margin-top:18px;">
+            <button class="action-btn" onclick="closeYesNo()">取消</button>
+            <button class="action-btn primary" onclick="doYesNo()">✦ 抽牌 ✦</button>
+        </div>
+    </div>
+</div>
+<div class="modal-overlay" id="threeSubModal">
+    <div class="modal-box" style="max-width:520px;">
+        <h3>✦ 选择镜中之象 ✦</h3>
+        <p style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:20px;font-weight:300;">三张牌将分别代表什么？</p>
+        <div class="three-sub-grid" id="threeSubGrid"></div>
+        <div class="modal-buttons" style="margin-top:18px;">
+            <button class="action-btn" onclick="closeThreeSubModal()">取消</button>
+        </div>
+    </div>
+</div>
+<div class="modal-overlay" id="saveModal">
+    <div class="modal-box">
+        <h3>✦ 保存本次占卜 ✦</h3>
+        <input type="text" class="modal-input" id="saveNameInput" placeholder="为这次占卜命名..." maxlength="30">
+        <div class="modal-buttons">
+            <button class="action-btn" onclick="closeSaveModal()">取消</button>
+            <button class="action-btn primary" onclick="doSave()">保存</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================
+// IMAGE URL BASE - Your GitHub repository
+// ============================================
+// ============================================
+// CARD BACK DRAWING ENGINE
+// ============================================
+// ===== BGM =====
+let bgmAudio = null;
+function initBGM() {
+    if (bgmAudio) return;
+    bgmAudio = new Audio('./assets/audio/bgm.mp3');
+    bgmAudio.onerror = function() {
+        bgmAudio.onerror = null;
+        bgmAudio.src = './assets/audio/bgm.mp3';
+};
+    bgmAudio.loop = true;
+    bgmAudio.volume = 0.3;
+}
+function startBGM() {
+    initBGM();
+    bgmAudio.play().catch(()=>{});
+}
+function stopBGM() {
+    if (bgmAudio) {
+        bgmAudio.pause();
+        bgmAudio.currentTime = 0;
+    }
+}
+function drawCardBack(canvas, w, h) {
+    canvas.width = w; canvas.height = h;
+    const c = canvas.getContext('2d');
+    const bg = c.createLinearGradient(0,0,w,h);
+    bg.addColorStop(0,'#0d0628'); bg.addColorStop(0.5,'#10082e'); bg.addColorStop(1,'#080420');
+    c.fillStyle = bg; c.fillRect(0,0,w,h);
+    const glow = c.createRadialGradient(w/2,h/2,0,w/2,h/2,w*0.7);
+    glow.addColorStop(0,'rgba(120,80,180,0.08)'); glow.addColorStop(0.5,'rgba(80,50,140,0.04)'); glow.addColorStop(1,'transparent');
+    c.fillStyle = glow; c.fillRect(0,0,w,h);
+    const goldDim = 'rgba(212,168,67,0.25)', goldFaint = 'rgba(212,168,67,0.12)';
+    c.strokeStyle = goldDim; c.lineWidth = 1.5; rrect(c,4,4,w-8,h-8,6); c.stroke();
+    c.strokeStyle = goldFaint; c.lineWidth = 0.8; rrect(c,9,9,w-18,h-18,4); c.stroke();
+    [[16,16],[w-16,16],[16,h-16],[w-16,h-16]].forEach(([cx,cy])=>{
+        c.save(); c.translate(cx,cy); c.rotate(Math.PI/4);
+        c.strokeStyle=goldDim; c.lineWidth=0.8; c.strokeRect(-3.5,-3.5,7,7);
+        c.fillStyle='rgba(212,168,67,0.15)'; c.fillRect(-2,-2,4,4); c.restore();
+        c.strokeStyle='rgba(212,168,67,0.06)'; c.lineWidth=0.5;
+        c.beginPath(); c.moveTo(cx,cy); c.lineTo(w/2,h/2); c.stroke();
+    });
+    const circR = Math.min(w,h)*0.26;
+    c.strokeStyle=goldDim; c.lineWidth=1; c.beginPath(); c.arc(w/2,h/2,circR,0,Math.PI*2); c.stroke();
+    c.strokeStyle='rgba(212,168,67,0.15)'; c.lineWidth=0.6; c.beginPath(); c.arc(w/2,h/2,circR*0.77,0,Math.PI*2); c.stroke();
+    const cg = c.createRadialGradient(w/2,h/2,0,w/2,h/2,circR*0.46);
+    cg.addColorStop(0,'rgba(212,168,67,0.12)'); cg.addColorStop(1,'rgba(212,168,67,0.02)');
+    c.fillStyle=cg; c.beginPath(); c.arc(w/2,h/2,circR*0.46,0,Math.PI*2); c.fill();
+    const starR = circR * 0.5;
+    c.save(); c.translate(w/2,h/2);
+    for(let i=0;i<8;i++){const a=(Math.PI*2*i)/8,oR=starR*(i%2===0?2.0:1.2);
+        c.strokeStyle=i%2===0?'rgba(212,168,67,0.2)':'rgba(212,168,67,0.1)'; c.lineWidth=i%2===0?0.8:0.5;
+        c.beginPath(); c.moveTo(Math.cos(a)*starR*0.5,Math.sin(a)*starR*0.5);
+        c.lineTo(Math.cos(a)*oR,Math.sin(a)*oR); c.stroke();}
+    c.fillStyle='rgba(212,168,67,0.3)'; c.strokeStyle=goldDim; c.lineWidth=0.8; c.beginPath();
+    for(let i=0;i<16;i++){const a=(Math.PI*2*i)/16-Math.PI/2,r=i%2===0?starR:starR*0.4;
+        c[i===0?'moveTo':'lineTo'](Math.cos(a)*r,Math.sin(a)*r);}
+    c.closePath(); c.fill(); c.stroke();
+    c.fillStyle='rgba(240,214,138,0.7)'; c.beginPath(); c.arc(0,0,2,0,Math.PI*2); c.fill();
+    c.restore();
+    [28,h-28].forEach(yy=>{
+        c.fillStyle='rgba(212,168,67,0.3)'; c.beginPath(); c.arc(w/2,yy,6,0,Math.PI*2); c.fill();
+        c.save(); c.globalCompositeOperation='destination-out';
+        c.beginPath(); c.arc(w/2+2.1,yy,5.1,0,Math.PI*2); c.fill(); c.restore();
+        c.strokeStyle='rgba(212,168,67,0.2)'; c.lineWidth=0.5; c.beginPath(); c.arc(w/2,yy,6,0,Math.PI*2); c.stroke();
+    });
+    c.strokeStyle=goldFaint; c.lineWidth=0.5;
+    [[0.2,38,0.38,38],[0.62,38,0.8,38],[0.2,h-38,0.38,h-38],[0.62,h-38,0.8,h-38]].forEach(([x1,y1,x2,y2])=>{
+        c.beginPath(); c.moveTo(w*x1,y1); c.lineTo(w*x2,y2); c.stroke();});
+    for(let i=0;i<12;i++){const a=(Math.PI*2*i)/12-Math.PI/2,dx=w/2+Math.cos(a)*circR,dy=h/2+Math.sin(a)*circR;
+        c.save(); c.translate(dx,dy); c.rotate(a+Math.PI/2);
+        c.fillStyle=i%3===0?'rgba(212,168,67,0.4)':'rgba(212,168,67,0.15)';
+        const ds=i%3===0?2.5:1.5; c.beginPath(); c.moveTo(0,-ds); c.lineTo(ds*0.6,0); c.lineTo(0,ds); c.lineTo(-ds*0.6,0);
+        c.closePath(); c.fill(); c.restore();}
+    c.globalAlpha=0.015;
+    for(let y=12;y<h-12;y+=4)for(let x=12;x<w-12;x+=4)if(Math.random()>0.85){c.fillStyle='#d4a843';c.fillRect(x,y,0.5,0.5);}
+    c.globalAlpha=1;
+}
+function rrect(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);
+    c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);
+    c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();}
+const IMG_SOURCES = [
+    './assets/cards/',
+    './assets/cards/',
+    './assets/cards/'
+];
+let bestSource = IMG_SOURCES[0];
+let sourceScores = [0, 0, 0]; // 记录每个源的成功次数
+
+function getCardImageUrl(cardId) {
+    return bestSource + cardId + '.png';
+}
+
+// ===== 全局图片缓存系统 =====
+var imgCache = {};
+var imgLoading = {};
+
+function loadCachedImg(cardId, callback) {
+    if (imgCache[cardId]) {
+        callback(imgCache[cardId]);
+        return;
+    }
+    if (imgLoading[cardId]) {
+        imgLoading[cardId].push(callback);
+        return;
+    }
+    imgLoading[cardId] = [callback];
+    var tryIdx = 0;
+    var round = 0;
+    var maxRounds = 2;
+    var timeoutId = null;
+
+    function onSuccess(src) {
+        imgCache[cardId] = src;
+        var queue = imgLoading[cardId] || [];
+        delete imgLoading[cardId];
+        queue.forEach(function(cb) { cb(src); });
+        var sIdx = -1;
+        for (var i = 0; i < IMG_SOURCES.length; i++) {
+            if (src.indexOf(IMG_SOURCES[i]) === 0) { sIdx = i; break; }
+        }
+        if (sIdx >= 0) {
+            sourceScores[sIdx]++;
+            if (sourceScores[sIdx] > sourceScores[IMG_SOURCES.indexOf(bestSource)] + 2) {
+                bestSource = IMG_SOURCES[sIdx];
+            }
+        }
+    }
+
+    function tryNext() {
+        if (tryIdx >= IMG_SOURCES.length) {
+            round++;
+            if (round < maxRounds) {
+                tryIdx = 0;
+                setTimeout(tryNext, 1000 + round * 1000);
+                return;
+            }
+            var queue = imgLoading[cardId] || [];
+            delete imgLoading[cardId];
+            queue.forEach(function(cb) { cb(''); });
+            return;
+        }
+        var src = IMG_SOURCES[tryIdx] + cardId + '.png';
+        var img = new Image();
+        if (timeoutId) clearTimeout(timeoutId);
+        timeoutId = setTimeout(function() {
+            img.onload = null;
+            img.onerror = null;
+            img.src = '';
+            tryIdx++;
+            tryNext();
+        }, 4000);
+        img.onload = function() {
+            clearTimeout(timeoutId);
+            onSuccess(src);
+        };
+        img.onerror = function() {
+            clearTimeout(timeoutId);
+            tryIdx++;
+            tryNext();
+        };
+        img.src = src;
+    }
+    tryNext();
+}
+
+// 把缓存的图片填入容器
+function fillCardImg(container, cardId) {
+    container.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#1a0a2e;color:#d4a843;font-size:0.5rem;">加载中...</div>';
+    loadCachedImg(cardId, function(src) {
+        if (src) {
+            container.innerHTML = '';
+            var img = document.createElement('img');
+            img.src = src;
+            img.style.cssText = 'width:100%;height:100%;display:block;object-fit:cover;';
+            container.appendChild(img);
+        } else {
+            container.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#1a0a2e;color:#d4a843;font-size:0.6rem;cursor:pointer;text-align:center;padding:4px;line-height:1.6;">点击<br>重试</div>';
+            container.onclick = function() { container.onclick = null; fillCardImg(container, cardId); };
+        }
+    });
+}
+
+
+// 智能检测最快源（测试多张图，更准确）
+(function detectFastestSource() {
+    let resolved = false;
+    const testCards = [0, 1, 10]; // 测试多张
+    IMG_SOURCES.forEach((src, srcIdx) => {
+        testCards.forEach(cardId => {
+            const img = new Image();
+            img.onload = () => {
+                sourceScores[srcIdx]++;
+                if (!resolved && sourceScores[srcIdx] >= 2) {
+                    resolved = true;
+                    bestSource = src;
+                }
+            };
+            img.src = src + cardId + '.png';
+        });
+    });
+    // 3秒后根据得分选最优源
+    setTimeout(() => {
+        if (!resolved) {
+            let maxIdx = 0;
+            sourceScores.forEach((s, i) => { if (s > sourceScores[maxIdx]) maxIdx = i; });
+            if (sourceScores[maxIdx] > 0) bestSource = IMG_SOURCES[maxIdx];
+        }
+    }, 3000);
+})();
+// ============================================
+// TAROT DATA
+// ============================================
+
+const majorArcana = [
+{id:0,name:"愚者",en:"The Fool",upright:["新开始","自由","天真","冒险","无限可能"],reversed:["鲁莽","犹豫不决","冒险过度","轻率","恐惧未知"],uprightDesc:"愚者是塔罗中最自由的灵魂，编号为0，代表着无限的可能性与全新的开始。他怀抱着纯真的信念踏上旅途，不畏惧悬崖边的未知。此刻宇宙在邀请你放下过去的包袱，像孩子一般重新出发。",reversedDesc:"逆位的愚者警示你可能正在以不计后果的方式行事，或者因为过度恐惧而完全不敢迈出第一步。试着在勇敢和谨慎之间找到平衡。",love:"感情中可能出现令人兴奋的新邂逅或关系的新阶段。",work:"适合尝试新方向、新项目，不要被旧框架束缚。",advice:"保持开放的心态，信任直觉，但也留意脚下的路。",reversedLove:"过于冲动的感情决定可能让你受伤，先冷静下来再行动。",reversedWork:"不要盲目跳槽或冒进，缺乏准备的冒险只会适得其反。",reversedAdvice:"在勇气和鲁莽之间找到平衡，三思而后行。"},
+{id:1,name:"魔术师",en:"The Magician",upright:["创造力","意志力","技能","自信","显化"],reversed:["操控","才能浪费","欺骗","缺乏行动力"],uprightDesc:"魔术师面前摆放着四大元素的工具，象征着你已经拥有了实现目标所需的一切资源。现在是将想法转化为现实的最佳时机。",reversedDesc:"逆位的魔术师暗示你可能没有充分利用自己的天赋和资源。审视你的真实意图，确保你的力量被用于正道。",love:"你有足够的魅力去吸引你想要的关系。",work:"展现你的专业能力，这是谈判和创业的好时机。",advice:"明确你的目标，集中所有资源去实现它。",reversedLove:"小心被花言巧语蒙蔽，看清对方的真实意图再交心。",reversedWork:"才华没有得到发挥，或有人在暗中操控局面，保持警惕。",reversedAdvice:"审视你的真实意图，不要用手段去达成目的。"},
+{id:2,name:"女祭司",en:"The High Priestess",upright:["直觉","潜意识","神秘","内在智慧","耐心"],reversed:["忽视直觉","表面化","秘密被揭露","思维混乱"],uprightDesc:"女祭司邀请你向内探寻，倾听来自灵魂深处的声音。答案不在外面，而在你的内心。",reversedDesc:"逆位的女祭司提示你可能过于依赖理性分析而忽略了直觉的指引。",love:"关系中有未说出口的事情，倾听内心。",work:"不要急于做决定，等待合适的时机。",advice:"静下来，你的内在智慧比外部建议更可靠。",reversedLove:"感情中你忽略了自己真实的感受，过度迎合对方只会失去自我。",reversedWork:"过于依赖数据和理性，忽视了直觉给你的预警信号。",reversedAdvice:"不要再压抑你的内心感受，学会信任那些无法用逻辑解释的直觉。"},
+{id:3,name:"皇后",en:"The Empress",upright:["丰饶","滋养","美丽","自然","母性","创造"],reversed:["过度依赖","创造力受阻","忽视自我","空虚"],uprightDesc:"皇后象征着无尽的丰饶与创造力。拥抱你的感性面，欣赏生活中的美。",reversedDesc:"逆位的皇后暗示你可能在付出和照顾他人的过程中忽略了自己的需求。",love:"感情充满温暖与甜蜜，关系在深化。",work:"创意项目会顺利推进。",advice:"善待自己的身体和心灵，在付出爱的同时也要学会接受爱。",reversedLove:"在感情中过度付出导致自我消耗，你需要先把爱给自己。",reversedWork:"创造力陷入瓶颈，可能是因为你太疲惫了，需要休息和充电。",reversedAdvice:"停止无底线地付出，学会对自己好一点，空杯子无法给别人倒水。"},
+{id:4,name:"皇帝",en:"The Emperor",upright:["权威","结构","稳定","领导力","纪律"],reversed:["专制","僵化","控制欲","缺乏纪律"],uprightDesc:"皇帝代表建立稳固结构和清晰边界的时刻。通过纪律和规划来实现你的目标。",reversedDesc:"逆位的皇帝暗示权力的滥用或过度控制。",love:"关系需要明确的界限和承诺。",work:"领导力被认可，适合推动重要项目。",advice:"建立清晰的计划和边界，但也要学会灵活变通。",reversedLove:"控制欲正在毒害你的感情，伴侣需要的是陪伴而不是管控。",reversedWork:"管理方式过于僵硬，团队因此产生抵触情绪，学会倾听下属。",reversedAdvice:"权力和控制不能带来真正的安全感，学会放手和信任。"},
+{id:5,name:"教皇",en:"The Hierophant",upright:["传统","指导","信仰","教育","精神导师"],reversed:["打破常规","质疑权威","个人信仰"],uprightDesc:"教皇代表着传统智慧的传承与精神指引。学习和灵性成长在此时特别重要。",reversedDesc:"逆位的教皇鼓励你质疑现有的规则，走出一条属于自己的道路。",love:"考虑关系中的长期承诺。",work:"遵循已有的流程，或寻找导师学习。",advice:"在传统与创新之间找到平衡点。",reversedLove:"不要被传统观念束缚你的感情选择，你有权走一条非传统的路。",reversedWork:"别盲目服从不合理的规则，有时打破常规才是正确的做法。",reversedAdvice:"质疑那些'应该'和'必须'，找到真正属于你自己的信仰和道路。"},
+{id:6,name:"恋人",en:"The Lovers",upright:["爱情","和谐","选择","价值观统一","灵魂连接"],reversed:["不和谐","价值观冲突","错误选择"],uprightDesc:"恋人牌代表着深层的灵魂连接和发自内心的重要选择。跟随你的心。",reversedDesc:"逆位的恋人暗示关系中存在不和谐或面临艰难的选择。",love:"深刻的感情连接正在形成。",work:"选择与你价值观一致的伙伴和项目。",advice:"在做重大决定时，确保它反映了你最真实的价值观。",reversedLove:"价值观的分歧正在侵蚀你们的关系，需要认真谈一谈核心问题。",reversedWork:"合作方与你理念不合，勉强在一起只会两败俱伤。",reversedAdvice:"不要因为害怕孤独而做出违背内心的选择，错误的选择比没有选择更糟。"},
+{id:7,name:"战车",en:"The Chariot",upright:["决心","胜利","行动力","意志力","突破"],reversed:["失去方向","失控","内在冲突"],uprightDesc:"战车象征着通过坚定的意志力驾驭对立的力量。保持方向感，胜利就在前方。",reversedDesc:"逆位的战车暗示你可能失去了方向感。停下来重新评估你的方向。",love:"在感情中需要主动出击。",work:"全力以赴推进你的项目。",advice:"驾驭你内在的对立力量，将它们转化为前进的动力。",reversedLove:"对感情过于急躁和强势，反而把对方越推越远。",reversedWork:"盲目地忙碌却没有方向，停下来想清楚再行动。",reversedAdvice:"失控不是因为力量不够，而是方向不对，先找回你的北极星。"},
+{id:8,name:"力量",en:"Strength",upright:["内在力量","勇气","耐心","慈悲","温柔的力量"],reversed:["自我怀疑","脆弱","缺乏自信"],uprightDesc:"真正的力量不是压制和对抗，而是以温柔和慈悲面对生命中的野性力量。",reversedDesc:"逆位的力量暗示你正在经历自我怀疑或信心危机。",love:"用耐心和理解化解感情中的矛盾。",work:"面对困难保持镇定和耐心。",advice:"真正的力量是柔软的。善待自己的脆弱面。",reversedLove:"自卑感让你在感情中畏缩不前，你值得被爱，请相信这一点。",reversedWork:"面对挑战时信心不足，你比自己以为的更有能力，不要退缩。",reversedAdvice:"你现在的脆弱是暂时的，允许自己示弱，然后慢慢找回力量。"},
+{id:9,name:"隐士",en:"The Hermit",upright:["内省","寻求真理","孤独","智慧","灵性指引"],reversed:["过度孤立","逃避现实","迷失"],uprightDesc:"隐士邀请你暂时远离喧嚣，进入深层的内省和静修。答案在你自己的内心深处。",reversedDesc:"逆位的隐士警告你可能过度封闭自己。是时候打开心门，重新与他人建立连接。",love:"如果单身，可能需要先了解自己才能遇到对的人。",work:"是时候深入研究和学习。",advice:"给自己安静独处的时间，但也要知道何时该走出洞穴。",reversedLove:"过度封闭自己只会错过真正的缘分，试着打开心门走出去。",reversedWork:"独自闷头苦干效率很低，你需要向外界寻求帮助和意见。",reversedAdvice:"孤独和独处不一样——你现在是在逃避而不是修行，走出来吧。"},
+{id:10,name:"命运之轮",en:"Wheel of Fortune",upright:["命运","转折点","机遇","循环","好运"],reversed:["逆境","抗拒变化","坏运气"],uprightDesc:"命运的齿轮已经开始转动，变化是不可避免的。好运正在向你靠近。",reversedDesc:"逆位的命运之轮暗示你可能正在经历一段不顺利的时期。记住，低谷也是循环的一部分。",love:"感情可能迎来重大转变。",work:"机遇之窗正在打开。",advice:"拥抱变化，顺应命运的流动。",reversedLove:"感情遭遇逆风期，但请记住这只是暂时的，轮子还会转回来。",reversedWork:"工作上暂时运气不佳，不是你的能力问题，耐心等待转机。",reversedAdvice:"低谷是循环的一部分，不要在逆境中做重大决定，等待风向转变。"},
+{id:11,name:"正义",en:"Justice",upright:["公正","真相","因果","平衡","法律"],reversed:["不公","逃避责任","偏见"],uprightDesc:"因果法则正在运作。过去的行为将结出果实。现在是做出公正决定的时候。",reversedDesc:"逆位的正义暗示某个不公平的情况正在发生。是时候面对真相。",love:"感情中需要公平对待彼此。",work:"合同和法律事务需要仔细审查。",advice:"以诚实和公正为准则行事。",reversedLove:"感情中存在不公平的付出，一方在牺牲另一方在索取，需要重新平衡。",reversedWork:"可能遇到不公正的对待，保留证据，必要时为自己争取权益。",reversedAdvice:"逃避责任只会让问题变得更大，勇敢面对后果才是解脱的开始。"},
+{id:12,name:"倒吊人",en:"The Hanged Man",upright:["放手","新视角","暂停","接受","牺牲"],reversed:["拖延","拒绝放手","困顿"],uprightDesc:"通过放弃行动和控制，获得了全新的看世界的角度。有时候放手本身就是最大的收获。",reversedDesc:"逆位的倒吊人暗示你可能在拖延必要的决定。",love:"暂停对感情的执着追求，换个角度看。",work:"暂时的停滞是为了更好的出发。",advice:"有时候放手比紧握更需要勇气。",reversedLove:"你一直在等待对方改变，但拖延只会让感情继续消耗。",reversedWork:"该做的决定不能再拖了，拖延只会让局面越来越被动。",reversedAdvice:"你不是在等待时机，你是在逃避决定。该放的放，该断的断。"},
+{id:13,name:"死神",en:"Death",upright:["转变","结束与新生","放下过去","深刻蜕变"],reversed:["抗拒改变","停滞不前","无法放手"],uprightDesc:"旧的篇章必须翻过，新的故事才能开始。结束往往伴随着悲伤，但这正是重生的前奏。",reversedDesc:"逆位的死神表示你正在强烈地抗拒一个必要的转变。鼓起勇气，让该结束的结束。",love:"一段关系可能发生根本性的改变。",work:"职业方向可能需要根本性的改变。",advice:"不要害怕结束，每一次死亡都是重生的序曲。",reversedLove:"你抓着一段已经死去的感情不放，放手才能遇到新的可能。",reversedWork:"留在一个没有未来的岗位上只是浪费时间，该转身的时候别犹豫。",reversedAdvice:"你害怕改变，但真正可怕的是什么都不变。放手吧，新生在等着你。"},
+{id:14,name:"节制",en:"Temperance",upright:["平衡","和谐","耐心","中庸之道","疗愈"],reversed:["失衡","过度","缺乏耐心"],uprightDesc:"节制牌带来疗愈与和谐的能量，邀请你在生活的各个方面找到黄金平衡点。",reversedDesc:"逆位的节制暗示你的生活正处于某种失衡状态。",love:"感情需要双方的磨合与妥协。",work:"多个项目之间需要合理分配时间和精力。",advice:"耐心是一种美德。在对立之中寻找和谐。",reversedLove:"感情中的付出严重失衡，一方在过度牺牲，需要坦诚沟通。",reversedWork:"工作和生活失去平衡，身心健康正在亮红灯，必须调整节奏。",reversedAdvice:"你在某些方面过度了——可能是工作、可能是情绪。找回中间地带。"},
+{id:15,name:"恶魔",en:"The Devil",upright:["束缚","执着","物质主义","阴暗面","上瘾"],reversed:["解脱","觉醒","打破束缚"],uprightDesc:"大多数束缚我们的东西都是自我施加的。意识到你被什么束缚是解脱的第一步。",reversedDesc:"逆位的恶魔意味着你正在觉醒，开始挣脱那些束缚你的锁链。",love:"审视关系中是否存在不健康的依赖。",work:"检查你是否被金钱或地位牢牢绑住。",advice:"勇敢面对你的阴暗面和恐惧。",reversedLove:"你终于看清了一段不健康的感情关系，挣脱的勇气正在觉醒。",reversedWork:"你正在从对金钱或地位的执念中解放出来，寻找真正有意义的事。",reversedAdvice:"觉醒已经开始，继续勇敢地剪断那些束缚你的锁链。"},
+{id:16,name:"塔",en:"The Tower",upright:["突变","颠覆","觉醒","真相揭露"],reversed:["抗拒改变","延迟灾难","内在转变"],uprightDesc:"闪电是真相的力量，它摧毁虚假。在废墟中，你会找到真正属于你的东西。",reversedDesc:"逆位的塔暗示你可能在努力避免一场必要的颠覆。",love:"关系可能经历突然的变化或真相的揭露。",work:"工作环境可能发生剧烈变动。",advice:"让该崩塌的崩塌吧。真相虽然痛苦，但它会让你自由。",reversedLove:"你预感到感情中有问题却一直在回避，拖得越久崩塌越剧烈。",reversedWork:"你隐约知道现有的工作模式不可持续，但不敢面对改变。",reversedAdvice:"你在努力维持一座摇摇欲坠的塔，有时候主动拆除好过被动倒塌。"},
+{id:17,name:"星星",en:"The Star",upright:["希望","灵感","平静","更新","信心","治愈"],reversed:["绝望","失去信心","灵感枯竭"],uprightDesc:"星星是黑暗后的曙光。希望正在重新点燃，灵感之泉正在流淌。",reversedDesc:"逆位的星星暗示你可能暂时失去了希望和方向感。不要放弃信念。",love:"治愈过去的情感伤痛，对爱保持希望。",work:"灵感回归，创意项目将获得突破。",advice:"保持希望，即使在最黑暗的夜晚，星星也在为你闪耀。",reversedLove:"过去的情伤让你不敢再相信爱情，但封闭的心无法接收新的温暖。",reversedWork:"灵感枯竭让你对工作失去热情，可能需要休息和换个环境。",reversedAdvice:"你暂时看不到星光，但它们一直都在。允许自己在黑暗中停留，光会回来的。"},
+{id:18,name:"月亮",en:"The Moon",upright:["幻象","直觉","恐惧","潜意识","迷惑"],reversed:["看清真相","释放恐惧","迷雾消散"],uprightDesc:"月亮的光线会制造幻象和阴影。事情并不像表面看起来那样。信任你的直觉，但也要小心幻象。",reversedDesc:"逆位的月亮带来积极的信息——混乱和恐惧正在消散，你开始看清真相。",love:"感情中可能存在误解或不安全感。",work:"留意隐藏的信息。",advice:"在混沌中保持清醒，区分直觉和恐惧。",reversedLove:"之前看不清的感情真相正在变得清晰，误会有望解开。",reversedWork:"之前困扰你的迷雾正在散去，隐藏的信息即将浮出水面。",reversedAdvice:"恐惧正在消退，你开始看清事物的真实面目，继续保持清醒。"},
+{id:19,name:"太阳",en:"The Sun",upright:["快乐","成功","活力","光明","丰盛"],reversed:["暂时受挫","过于乐观","延迟的快乐"],uprightDesc:"太阳带来成功、活力和纯粹的快乐。是时候庆祝生活、展现真实的自己了。",reversedDesc:"逆位的太阳仍然积极，只是快乐和成功可能会有些延迟。",love:"感情充满阳光和欢乐。",work:"事业迎来高光时刻。",advice:"释放你的热情和创造力，生活值得庆祝！",reversedLove:"感情中的快乐被一些乌云暂时遮挡，但阳光很快就会回来。",reversedWork:"成功会来但可能要再等等，不要因为延迟而灰心丧气。",reversedAdvice:"不要过于乐观地忽略潜在问题，先处理好隐患再庆祝。"},
+{id:20,name:"审判",en:"Judgement",upright:["觉醒","重生","使命召唤","反思"],reversed:["自我批判","逃避使命","无法释怀"],uprightDesc:"灵魂的觉醒时刻。回顾过去是为了从每一段经历中提炼智慧。觉醒已经开始。",reversedDesc:"逆位的审判暗示你可能在逃避自我反省。释放过去的负罪感，给自己重新开始的机会。",love:"对过去的感情经历做出成熟的回顾。",work:"职业转型的重大时刻。",advice:"回顾过去但不要被它束缚，勇敢走向新生。",reversedLove:"你还在用过去的伤痛惩罚现在的自己和伴侣，是时候放下了。",reversedWork:"你听到了内心转变的召唤却不敢回应，逃避只会让你更痛苦。",reversedAdvice:"停止过度的自我批判，过去的错误已经发生，原谅自己才能重新开始。"},
+{id:21,name:"世界",en:"The World",upright:["完成","圆满","成就","整合","新循环"],reversed:["未完成","缺乏结束感","延迟完成"],uprightDesc:"你已经走过了完整的一个生命循环，达成了一个重要的里程碑。庆祝你的成就吧！",reversedDesc:"逆位的世界暗示你可能在到达终点之前就停了下来。不要放弃，完成就在眼前。",love:"感情达到了美满的阶段。",work:"项目圆满完成，成就获得认可。",advice:"庆祝你的成就，然后以全新的姿态开始下一个冒险。",reversedLove:"感情总觉得差了点什么，可能是你还没有完全放下过去。",reversedWork:"项目接近尾声却迟迟无法收尾，最后一步最需要坚持。",reversedAdvice:"你离完成只差一步了，不要在终点线前停下来。"}
+];
+function genMinor(suit, suitCn, idStart, kw) {
+    const ranks = ['王牌','二','三','四','五','六','七','八','九','十','侍从','骑士','王后','国王'];
+    const ranksEn = ['Ace','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Page','Knight','Queen','King'];
+    return ranks.map((r,i) => ({
+        id: idStart+i, name: suitCn+r, en: ranksEn[i]+' of '+suit.charAt(0).toUpperCase()+suit.slice(1),
+        upright: kw[i]?.up || ['积极','力量','成长'], reversed: kw[i]?.rev || ['阻碍','反思','调整'],
+        uprightDesc: kw[i]?.upDesc || '这张牌带来了'+suitCn+'的能量，引导你在这个方向上前进。',
+        reversedDesc: kw[i]?.revDesc || '逆位暗示在'+suitCn+'相关的领域需要更多关注和反思。',
+        love: kw[i]?.love || '感情方面需要关注。', work: kw[i]?.work || '事业方面有新发展。',
+        advice: kw[i]?.advice || '保持觉知，信任过程。',
+        reversedLove: kw[i]?.revLove || '', reversedWork: kw[i]?.revWork || '',
+        reversedAdvice: kw[i]?.revAdvice || ''
+    }));
+}
+
+const wandsKw = [
+{up:["新灵感","热情","创造力"],rev:["延迟","缺乏动力"],upDesc:"全新的创意火花正在点燃！",revDesc:"创造力暂时受到阻碍。",love:"热情的新邂逅。",work:"新项目灵感涌现。",advice:"抓住灵感的火花。",revLove:"对感情提不起热情，内心的火焰需要重新点燃。",revWork:"项目启动受阻，缺乏动力和方向。",revAdvice:"不要强求灵感，休息后再出发。"},
+{up:["规划","远见","决策"],rev:["恐惧未知","犹豫不决"],upDesc:"现在是制定宏大计划的时刻。",revDesc:"对未知的恐惧正在阻碍你。",love:"需要对未来做出规划。",work:"制定长期战略。",advice:"抬头看看远方。",revLove:"对感情的未来感到迷茫，害怕做出承诺。",revWork:"缺乏远见导致决策犹豫，错失良机。",revAdvice:"恐惧不会因为你逃避就消失，面对它。"},
+{up:["扩展","远见","进展顺利"],rev:["障碍","延迟"],upDesc:"你的努力正在开花结果。",revDesc:"计划遇到了延迟和阻碍。",love:"感情稳步发展。",work:"项目扩展有利。",advice:"保持耐心和远见。",revLove:"感情发展遇到瓶颈，不要急躁，给彼此时间。",revWork:"项目进展缓慢，可能需要调整策略。",revAdvice:"延迟不是失败，调整方向后继续前行。"},
+{up:["庆祝","和谐","里程碑"],rev:["缺乏根基","不安"],upDesc:"一个重要的里程碑已经达成！",revDesc:"你可能内心缺乏安全感。",love:"关系中的里程碑时刻。",work:"项目阶段性成功。",advice:"停下来庆祝你的成就。",revLove:"表面甜蜜但内心不安，你们的根基是否真的稳固？",revWork:"成就感来得快去得也快，根基不够扎实。",revAdvice:"在庆祝之前，先确保你的基础足够牢固。"},
+{up:["竞争","冲突","成长"],rev:["回避冲突","内心挣扎"],upDesc:"建设性的竞争和碰撞推动你成长。",revDesc:"你可能在回避必要的冲突。",love:"小争吵可能是必要的。",work:"竞争激烈但是好机会。",advice:"不要害怕冲突和竞争。",revLove:"逃避争吵不代表没有问题，压抑的矛盾终会爆发。",revWork:"团队内部暗流涌动，回避只会让问题恶化。",revAdvice:"面对冲突比逃避冲突需要更大的勇气，但也更值得。"},
+{up:["胜利","荣誉","认可"],rev:["失败感","自大"],upDesc:"你的努力终于获得了认可！",revDesc:"你的付出没有得到认可。",love:"感到被欣赏和珍视。",work:"获得晋升或嘉奖。",advice:"享受成就，保持谦逊。",revLove:"在感情中感到不被重视，需要表达你的需求。",revWork:"努力没有被看见，可能需要换一种方式展示你的价值。",revAdvice:"外界的认可固然重要，但不要因为没有掌声就否定自己。"},
+{up:["坚守","防御","毅力"],rev:["退缩","不堪重负"],upDesc:"坚守你的立场和信念。",revDesc:"压力太大让你想要退缩。",love:"为你的底线站出来。",work:"坚守专业立场。",advice:"坚持下去，胜利属于不放弃的人。",revLove:"在感情中承受了太多压力，你有权利说够了。",revWork:"工作压力已经超过了你的承受极限，寻求支援。",revAdvice:"坚持是美德，但识时务也是智慧，不要硬撑到崩溃。"},
+{up:["快速进展","消息","行动"],rev:["延迟","受阻","混乱"],upDesc:"一切都在快速推进！好消息即将到来。",revDesc:"你期待的进展遇到了延迟。",love:"感情发展迅速。",work:"项目快速推进。",advice:"一切都在加速，跟上节奏！",revLove:"感情进展突然停滞，不要焦虑，耐心等待。",revWork:"项目被各种意外打乱节奏，需要重新规划时间。",revAdvice:"越急越乱，先让自己冷静下来再处理事情。"},
+{up:["坚韧","最后考验","勇气"],rev:["精疲力竭","放弃"],upDesc:"最后一道考验——再坚持一下。",revDesc:"你已经精疲力竭。",love:"感情经历考验但还在坚持。",work:"最困难的阶段，咬牙坚持。",advice:"不要在黎明前放弃。",revLove:"你在感情中已经身心俱疲，也许放手比硬撑更好。",revWork:"过度的工作压力正在损害你的健康，学会及时休息。",revAdvice:"精疲力竭不是软弱的表现，你已经很努力了，允许自己休息。"},
+{up:["重担","责任","压力"],rev:["放下负担","学会委派"],upDesc:"你不必一个人扛下所有。",revDesc:"你正在学会放下不必要的重担。",love:"需要与伴侣平等分担。",work:"学会说不和分配任务。",advice:"轻装才能走得更远。",revLove:"你终于意识到不需要独自承担感情中所有的问题。",revWork:"开始学会委派任务和拒绝不合理的要求，这是进步。",revAdvice:"放下不是放弃，而是智慧地选择该背负什么。"},
+{up:["探索","热忱","好消息"],rev:["缺乏方向","三分钟热度"],upDesc:"新的灵感和好消息即将到来。",revDesc:"热情来得快去得也快。",love:"令人心动的新邂逅。",work:"好消息即将传来。",advice:"保持好奇心和探索精神。",revLove:"对感情缺乏持久的热情，问问自己到底想要什么。",revWork:"对新工作的兴趣很快消退，需要找到持久的动力。",revAdvice:"不要什么都想尝试，找到一个方向深入下去。"},
+{up:["冒险","激情","行动力"],rev:["冲动","鲁莽"],upDesc:"充满不可阻挡的热情和行动力。",revDesc:"冲动可能给你带来麻烦。",love:"火热而充满激情的恋情。",work:"大胆推进项目。",advice:"热情是武器，但要学会引导它。",revLove:"感情中过于冲动和急躁，可能因为莽撞而伤害到对方。",revWork:"不加思考的行动反而帮了倒忙，先规划再行动。",revAdvice:"冲劲十足但方向混乱，先冷静再出发。"},
+{up:["自信","独立","温暖"],rev:["嫉妒","控制欲"],upDesc:"散发着温暖而强大的能量。",revDesc:"不安全感可能让你变得控制欲强。",love:"保持独立和自信。",work:"领导力和社交能力是核心竞争力。",advice:"像太阳一样发光发热。",revLove:"嫉妒心和控制欲正在毒害你的感情，给对方自由。",revWork:"对团队管控过度，信任你的同事。",revAdvice:"不安全感不会因为控制别人而消失，安全感来自内心。"},
+{up:["远见","领袖气质","大胆"],rev:["专横","不切实际"],upDesc:"天生的领袖和远见者。",revDesc:"领导方式可能过于专横。",love:"成为充满激情的伴侣。",work:"展现你的领导力。",advice:"用愿景激励他人。",revLove:"对感情的期待过于理想化，现实中的伴侣不是你想象的剧本。",revWork:"领导方式令人窒息，需要更多倾听和包容。",revAdvice:"远大的目标需要脚踏实地的执行，别只画饼不做事。"}
+];
+
+const cupsKw = [
+{up:["新感情","爱","喜悦"],rev:["情感压抑","空虚"],upDesc:"最纯粹的爱与情感能量涌入你的生活。",revDesc:"你可能在压抑自己的情感需求。",love:"新恋情或感情升华。",work:"对工作重新燃起热情。",advice:"打开你的心，允许爱自由地流动。",revLove:"你把真实的情感深深藏起来，对方感受不到你的心。",revWork:"对工作失去了情感投入，只是在机械地完成任务。",revAdvice:"不要再压抑你的感受了，允许自己去感受和表达。"},
+{up:["伙伴","联结","吸引"],rev:["分离","失衡"],upDesc:"深层的灵魂联结，平等、尊重、互相欣赏。",revDesc:"关系中的平衡被打破了。",love:"灵魂伴侣连接。",work:"理想的合作伙伴。",advice:"真正的连接建立在平等和尊重之上。",revLove:"关系中的付出和回报严重不对等，需要重新谈判。",revWork:"合作关系出现裂痕，双方目标开始分化。",revAdvice:"失衡的关系无法持久，勇敢提出你的需求。"},
+{up:["庆祝","友谊","欢乐"],rev:["过度放纵","社交疲劳"],upDesc:"友谊和共同欢庆的美好时刻。",revDesc:"社交让你疲惫。",love:"朋友间可能产生恋情。",work:"团队合作成果喜人。",advice:"珍惜你的友谊。",revLove:"社交圈的热闹掩盖不了内心的孤独，你需要真正的深度连接。",revWork:"团队过于松散，聚会多但实际产出少。",revAdvice:"比起热闹的社交，你现在更需要独处和充电。"},
+{up:["不满足","冥想","倦怠"],rev:["觉醒","接受新机遇"],upDesc:"一个新的机会正在被你忽视。",revDesc:"你开始从倦怠中醒来。",love:"可能对现有关系感到麻木。",work:"新机会就在眼前。",advice:"看看宇宙正在递给你什么。",revLove:"你终于愿意正视感情中的问题，改变正在开始。",revWork:"你开始重新审视被你忽视的机会，觉醒来得正是时候。",revAdvice:"从麻木中醒来的第一步已经迈出，继续向前。"},
+{up:["失落","悲伤","遗憾"],rev:["释怀","向前看"],upDesc:"你正在为失去的东西悲伤，但身后还有完好的杯子。",revDesc:"你正在从悲伤中恢复。",love:"可能正在经历失恋的痛苦。",work:"项目失败需要消化。",advice:"转身看看，你还拥有很多。",revLove:"失恋的伤痛正在慢慢愈合，你开始准备好迎接新的感情。",revWork:"从失败中汲取教训，准备重新出发。",revAdvice:"最难过的时期已经过去了，允许自己慢慢走出来。"},
+{up:["怀旧","童年","纯真"],rev:["活在过去","无法长大"],upDesc:"温暖的怀旧气息和甜蜜回忆。",revDesc:"过于沉溺于过去的美好。",love:"旧情人可能重新出现。",work:"可能与旧同事合作。",advice:"在当下创造新的美好。",revLove:"你一直在拿过去的恋情和现在比较，这不公平。",revWork:"怀念过去的工作环境无济于事，适应当下才是关键。",revAdvice:"过去的美好不会重来，把目光放到当下和未来。"},
+{up:["幻想","选择","诱惑"],rev:["回归现实","做出抉择"],upDesc:"面对众多可能性，分辨哪些是真实的机遇。",revDesc:"你开始从幻想中醒来。",love:"分辨真感情和一时迷恋。",work:"需要聚焦。",advice:"选择一个真实可行的目标。",revLove:"你终于看清了哪些是真爱哪些只是幻想，做出选择吧。",revWork:"不再被各种诱人但不切实际的想法分心，开始聚焦。",revAdvice:"从白日梦中醒来是好事，现实虽不如幻想美好但更真实。"},
+{up:["离开","寻找意义"],rev:["逃避","害怕改变"],upDesc:"最勇敢的事情就是离开看似完好的现状。",revDesc:"你知道应该离开但无法迈步。",love:"关系无法满足深层需求。",work:"寻找更有意义的方向。",advice:"勇敢地去寻找真正滋养灵魂的东西。",revLove:"你知道这段感情不对，却因为害怕孤独而不敢离开。",revWork:"不满意现状却不敢跳出舒适区，恐惧在束缚着你。",revAdvice:"逃避改变比改变本身更痛苦，鼓起勇气迈出那一步。"},
+{up:["愿望成真","满足","幸福"],rev:["不满足","贪心"],upDesc:"你的愿望即将成真！享受这份幸福。",revDesc:"内心仍然不满足。真正的幸福来自感恩。",love:"感到极大的满足和幸福。",work:"目标达成，成就感满满。",advice:"真正的满足来自于感恩你所拥有的。",revLove:"拥有了却还是不快乐，你真正需要的到底是什么？",revWork:"目标达成后发现并不如预期那么满足，重新审视什么才重要。",revAdvice:"贪心会让你永远无法满足，学会感恩此刻拥有的一切。"},
+{up:["圆满幸福","家庭和谐"],rev:["家庭不和","理想破灭"],upDesc:"情感上的最高圆满——持久的爱和和谐的家庭。",revDesc:"家庭表面和谐但内里有裂痕。",love:"深层的家庭幸福。",work:"找到有意义且满足的事业。",advice:"珍惜眼前的每一份温暖和爱。",revLove:"家庭中的裂痕不会自己愈合，需要每个人都用心修补。",revWork:"工作带来的成就感无法弥补家庭关系的缺失。",revAdvice:"完美的家庭不存在，但真诚的努力可以让它变得更好。"},
+{up:["直觉","创意","浪漫消息"],rev:["情感不成熟","幻想过多"],upDesc:"生活中出现了意想不到的灵感和惊喜。",revDesc:"过度沉浸在幻想中。",love:"可能收到浪漫的表白。",work:"创意灵感涌现。",advice:"保持童心和好奇。",revLove:"不要把爱情理想化，眼前的人有优点也有缺点。",revWork:"想法很多但都停留在空想阶段，需要脚踏实地。",revAdvice:"做梦是好的，但也需要睁开眼睛面对现实。"},
+{up:["浪漫","魅力","理想主义"],rev:["不切实际","情绪化"],upDesc:"浪漫与理想主义的化身。一个浪漫的机遇即将到来。",revDesc:"过于理想主义可能导致失望。",love:"浪漫的追求者出现。",work:"追求充满热情的工作。",advice:"追随你的心，但也要让理性指引方向。",revLove:"过于情绪化让你在感情中起伏不定，需要更多稳定。",revWork:"对工作抱有不切实际的期待，结果只会失望。",revAdvice:"浪漫主义是你的天赋，但需要现实的根基来支撑。"},
+{up:["共情","温柔","直觉力"],rev:["情绪不稳","过度敏感"],upDesc:"情感智慧和直觉力的化身——深深感受着一切。",revDesc:"你可能被自己的情绪淹没了。",love:"用理解和共情滋养关系。",work:"利用情商做出明智判断。",advice:"你的共情力是天赋，但也把温柔留给自己。",revLove:"过度敏感让你在感情中草木皆兵，小事也能引发情绪风暴。",revWork:"情绪波动影响了工作表现，需要学会情绪管理。",revAdvice:"你感受到的不一定都是真的，有时候是情绪在放大信号。"},
+{up:["情感成熟","平衡","智慧"],rev:["情感压抑","操控"],upDesc:"精通情感的艺术——既有深邃的感受力，又能驾驭情绪。",revDesc:"你可能在压抑真实情感。",love:"以成熟和智慧经营感情。",work:"用情商领导团队。",advice:"掌握情绪不是压制，而是智慧引导。",revLove:"你用理智压制了真实的情感，看似冷静实则在积累问题。",revWork:"对团队的情感操控终会被看穿，真诚才是长久之道。",revAdvice:"压抑情绪不等于处理情绪，找到安全的方式让它们流出来。"}
+];
+
+const swordsKw = [
+{up:["清晰","突破","真相"],rev:["混乱","误导"],upDesc:"智慧和真相的终极力量。你的思维正在经历突破。",revDesc:"思路混乱不清。",love:"需要坦诚的沟通。",work:"新的想法和战略突破。",advice:"用清晰的思维切割掉一切幻象。",revLove:"沟通中的误解越来越深，你们需要冷静下来好好谈谈。",revWork:"思路混乱导致方向错误，先理清想法再行动。",revAdvice:"现在不是做重要决定的时候，等头脑清醒了再说。"},
+{up:["僵局","两难","内心矛盾"],rev:["做出决定","打破僵局"],upDesc:"你面临一个艰难的抉择，但逃避不是办法。",revDesc:"你终于准备好面对那个决定了。",love:"犹豫不决需要面对。",work:"重要的抉择不能再拖延。",advice:"逃避选择本身也是一种选择。",revLove:"你终于准备好做出感情上的决定了，相信自己。",revWork:"僵局终于被打破，虽然过程艰难但结果会好起来。",revAdvice:"做出了决定就不要回头，向前看。"},
+{up:["心碎","悲伤","背叛"],rev:["从伤痛恢复","释放悲伤"],upDesc:"这是最直白的心碎象征。允许自己去感受。",revDesc:"最痛苦的时期正在过去。",love:"可能经历情感上的重大创伤。",work:"接到令人失望的消息。",advice:"允许自己去悲伤，暴风雨终会过去。",revLove:"心碎的伤口正在慢慢愈合，你变得更坚强了。",revWork:"从打击中恢复，用经验教训武装自己。",revAdvice:"最痛苦的部分已经过去了，让伤口结痂，不要反复揭开。"},
+{up:["休息","恢复","冥想"],rev:["不安","无法休息"],upDesc:"这是神圣的休息时间——积蓄力量。",revDesc:"你急需休息却停不下来。",love:"给感情一些喘息的空间。",work:"身心健康比截止日期更重要。",advice:"战士也需要休息。",revLove:"你们都太疲惫了，给彼此独处的时间反而有益。",revWork:"身体在发出警告了，再不休息就要强制停机了。",revAdvice:"忙碌不等于有价值，你现在最需要做的事就是什么都不做。"},
+{up:["冲突","得不偿失"],rev:["和解","反思"],upDesc:"他赢了这场争斗——但赢得了什么？",revDesc:"你开始意识到争斗的代价太高了。",love:"争吵赢了道理却输了感情。",work:"办公室政治得不偿失。",advice:"有些战斗不值得打。",revLove:"你开始意识到争对错没有意义，选择和解是更大的勇气。",revWork:"职场纷争正在降温，是时候放下对立寻求合作。",revAdvice:"赢了面子输了里子，这种胜利毫无意义。"},
+{up:["过渡","前进","好转"],rev:["困在过去","抗拒转变"],upDesc:"你正在从困难中转移向更平静的水域。",revDesc:"你发现很难离开当前的困境。",love:"从不健康的关系中走出。",work:"职业转换正在进行。",advice:"前进的路可能不舒适，但回头更痛苦。",revLove:"明知道应该走出来却不断回头，你在折磨自己。",revWork:"一直犹豫要不要换工作，在犹豫中浪费了更多时间。",revAdvice:"你被困住不是因为走不了，而是因为你不愿意走。"},
+{up:["策略","隐秘","机智"],rev:["坦诚","秘密曝光"],upDesc:"需要运用策略和智慧来应对局面。",revDesc:"秘密即将被揭露。",love:"关系中可能存在不坦诚。",work:"留意隐藏的议程。",advice:"智慧和策略是工具，但不要跨越欺骗的界线。",revLove:"隐瞒的事情即将曝光，与其被揭穿不如主动坦白。",revWork:"办公室里的秘密计划被发现了，坦诚面对后果。",revAdvice:"秘密是定时炸弹，越早拆除越安全。"},
+{up:["困境","自我束缚","盲点"],rev:["解放","突破限制"],upDesc:"大多数困住你的东西都是头脑中的限制。",revDesc:"你开始意识到束缚你的是自己的思维。",love:"不要让恐惧困住你的感情。",work:"选择比你想象的多。",advice:"你的牢笼没有锁——改变想法就能走出来。",revLove:"你正在挣脱自我设限，开始相信自己值得被爱。",revWork:"思维枷锁正在松动，你开始看到更多的可能性。",revAdvice:"觉醒已经开始，继续拆除那些你自己建造的高墙。"},
+{up:["焦虑","失眠","过度忧虑"],rev:["释放焦虑","最坏的已过去"],upDesc:"你可能被恐惧和忧虑折磨得夜不能寐。",revDesc:"最黑暗的夜即将过去。",love:"对感情的过度忧虑在折磨你。",work:"工作压力导致焦虑。",advice:"你的恐惧比现实本身更可怕。",revLove:"对感情的焦虑正在缓解，事情没有你想象的那么糟。",revWork:"工作上最让你焦虑的事情正在过去。",revAdvice:"天亮了，那些在深夜折磨你的恐惧正在消散。"},
+{up:["终结","最低谷","结束"],rev:["触底反弹","重生"],upDesc:"你已经到了最低谷，从现在开始，只有向上的路。",revDesc:"你正在从最低点重新站起来。",love:"一段感情可能走到了尽头。",work:"项目终结，但塞翁失马焉知非福。",advice:"当你跌到谷底，唯一的方向就是向上。",revLove:"从感情最黑暗的时期走出来了，新的开始就在前方。",revWork:"最糟糕的时期已经过去，事情开始向好的方向发展。",revAdvice:"你已经从谷底开始往上爬了，每一步都在变好。"},
+{up:["好奇心","敏锐","新想法"],rev:["八卦","粗心"],upDesc:"思维敏捷，充满好奇心。",revDesc:"注意言辞可能伤害到他人。",love:"沟通中注意措辞。",work:"适合学习新技能。",advice:"好奇心和敏锐是天赋，用在正确的地方。",revLove:"说话不经大脑可能伤到对方，管好你的嘴。",revWork:"八卦和不谨慎的言论可能给你带来麻烦。",revAdvice:"言语是有力量的，用它来建设而不是破坏。"},
+{up:["迅速行动","果断","雄心"],rev:["冲动","鲁莽"],upDesc:"势如破竹，现在是果断行动的时刻。",revDesc:"鲁莽和冲动可能让你陷入麻烦。",love:"直接表达感受，但别太尖锐。",work:"快速推进项目。",advice:"果断是美德，但确保方向正确。",revLove:"话说得太快太狠，已经伤到对方了，先道歉。",revWork:"急于求成反而出了大错，先停下来想清楚。",revAdvice:"速度不等于效率，方向错了跑得越快偏得越远。"},
+{up:["清晰","独立","直率"],rev:["冷漠","尖刻"],upDesc:"经历过痛苦但变得更加清醒和坚强。",revDesc:"你可能变得过于冷漠。",love:"保持独立和清醒，但也别忘了打开心门。",work:"用敏锐的分析力做判断。",advice:"坚强不等于冷漠，清醒不等于无情。",revLove:"你用冷漠来保护自己，但也把真心爱你的人挡在了门外。",revWork:"过于尖锐的批评伤害了同事关系，需要多一点温度。",revAdvice:"经历过伤痛不代表要封闭自己，试着重新学会柔软。"},
+{up:["理性","权威","公正"],rev:["独裁","冷酷"],upDesc:"最高的理性和公正——以逻辑和智慧做出决策。",revDesc:"过于冷酷理性可能伤害他人。",love:"需要更多的温情。",work:"以公正和智慧领导团队。",advice:"智慧不仅是头脑的，也是心灵的。",revLove:"你用理性碾压了感情中的温柔，伴侣需要的是爱不是道理。",revWork:"领导方式太冷酷，团队需要的是指引而不是审判。",revAdvice:"真正的智者不仅有清醒的头脑，还有温暖的心。"}
+];
+
+const pentaclesKw = [
+{up:["新机遇","繁荣","好的开始"],rev:["错失良机","财务损失"],upDesc:"物质世界的丰盛之门为你打开。",revDesc:"一个好的机会可能溜走了。",love:"关系建立在稳固基础之上。",work:"新的财务机遇出现。",advice:"脚踏实地地把握机遇。",revLove:"因为犹豫不决错过了一段好感情。",revWork:"好机会从手中溜走了，下次果断一点。",revAdvice:"不要再犹豫了，机遇不会一直等你。"},
+{up:["平衡","灵活应变","适应"],rev:["失衡","不堪重负"],upDesc:"生活需要你在多个领域间保持灵活平衡。",revDesc:"太多事情同时发生让你应接不暇。",love:"寻找感情和生活的平衡。",work:"多项目并行需要时间管理。",advice:"灵活、专注、保持节奏。",revLove:"工作和感情严重失衡，你必须做出取舍。",revWork:"同时处理太多事导致每件都做不好。",revAdvice:"你不是超人，学会优先级排序。"},
+{up:["合作","团队","精益求精"],rev:["各自为政","质量下降"],upDesc:"团队合作和精益求精是成功的关键。",revDesc:"团队缺乏协调。",love:"关系中需要共同努力。",work:"团队协作是关键。",advice:"借助团队的力量精益求精。",revLove:"你们各过各的生活，已经不像是伴侣了。",revWork:"团队协作出了问题，大家都在单打独斗。",revAdvice:"如果不能齐心协力，再好的计划也无法执行。"},
+{up:["安全感","保守","稳定"],rev:["放手","慷慨"],upDesc:"适度的安全感好，但过度执着会阻碍流动。",revDesc:"你正在学会放松对物质的紧握。",love:"控制欲会推开对方。",work:"财务稳健但别过度保守。",advice:"握紧拳头你什么都抓不住。",revLove:"你开始学会在感情中放松控制，这是好事。",revWork:"开始愿意投资和冒一点风险了，进步。",revAdvice:"适度地松开手，你会发现流动带来更多。"},
+{up:["困难","贫困","孤立"],rev:["走出困境","获得帮助"],upDesc:"你可能正在经历困难时期，但帮助就在身边。",revDesc:"困难时期正在过去。",love:"感到被忽视或孤立。",work:"财务困难需要正视。",advice:"不要独自硬扛——帮助就在身边。",revLove:"孤立的感觉正在消退，有人在关心你。",revWork:"财务困境出现了转机，最艰难的时期过去了。",revAdvice:"你已经开始走出低谷了，继续寻求帮助和支持。"},
+{up:["慷慨","施与受","公平"],rev:["贪婪","施恩图报"],upDesc:"给予和接受的平衡——慷慨地分享。",revDesc:"给予时附加了条件。",love:"慷慨地付出爱。",work:"分享资源和知识。",advice:"真正的慷慨不求回报。",revLove:"你的付出带着条件和期待，这不是真正的爱。",revWork:"分享资源时总是想着回报，功利心太重了。",revAdvice:"带着条件的慷慨不是慷慨，检视你给予的真实动机。"},
+{up:["耐心","评估成果","长期投资"],rev:["急于求成","回报不足"],upDesc:"你的长期努力正在慢慢结出果实。",revDesc:"你对投入的回报感到失望。",love:"感情需要时间培养。",work:"长期投资需要耐心。",advice:"耐心等待收获的季节。",revLove:"急于看到感情结果反而给了对方压力。",revWork:"投入了很多却看不到回报，可能需要调整策略。",revAdvice:"如果回报迟迟不来，也许需要重新评估你的方向。"},
+{up:["勤奋","技艺精进","专注"],rev:["敷衍了事","缺乏热情"],upDesc:"通过持续练习，你的技能正在日益精进。",revDesc:"你可能对工作失去了热情。",love:"用心经营感情的细节。",work:"技能提升期，学习有显著回报。",advice:"大师不是天生的——保持专注和谦虚。",revLove:"感情经营开始敷衍，细节中的爱在消失。",revWork:"对工作失去热情，只是在应付了事。",revAdvice:"重新找到让你热血沸腾的事情，否则一切只是消磨时间。"},
+{up:["丰收","独立","优雅"],rev:["过度依赖","虚荣"],upDesc:"你的独立和辛勤工作正在开花结果。",revDesc:"过度追求物质的外在表现。",love:"独立自主更具吸引力。",work:"专业能力带来丰厚回报。",advice:"真正的富足是你凭自己的力量创造的。",revLove:"用物质来弥补感情的空虚，这条路走不通。",revWork:"过于在意外在形象而忽视了真实的能力。",revAdvice:"真正的价值不在于你拥有什么，而在于你是什么样的人。"},
+{up:["财富传承","家族","长久稳定"],rev:["家庭纷争","根基不稳"],upDesc:"物质和精神的双重传承。",revDesc:"家庭中可能存在争议。",love:"深厚的家庭纽带。",work:"建立持久传承的事业。",advice:"你建立的一切将惠及后来者。",revLove:"家庭矛盾影响了你们的感情，需要一起面对。",revWork:"事业的根基出现了动摇，需要回归基本面。",revAdvice:"传承不只是物质的，更重要的是价值观和爱。"},
+{up:["学习","新技能","务实"],rev:["缺乏进展","懒散"],upDesc:"脚踏实地、目标明确地追求新技能。",revDesc:"学习缺乏恒心。",love:"稳步经营务实的感情。",work:"适合学习新技能。",advice:"千里之行始于足下。",revLove:"对感情缺乏经营的耐心，好感情不会从天上掉下来。",revWork:"学习三天打鱼两天晒网，这样永远不会有进步。",revAdvice:"别再找借口了，现在就开始行动。"},
+{up:["勤劳","可靠","脚踏实地"],rev:["固执","效率低下"],upDesc:"不是最快但一定是最可靠的。稳扎稳打永远胜过急功近利。",revDesc:"你可能陷入了固执或懈怠。",love:"稳定可靠的感情。",work:"以务实的态度稳步推进。",advice:"稳定的乌龟总能赢得赛跑。",revLove:"感情陷入了一成不变的模式，需要注入新鲜感。",revWork:"过于固执地坚持低效的方法，需要变通。",revAdvice:"勤劳是好的，但方向不对再努力也白费。"},
+{up:["务实","滋养","富足"],rev:["过度操劳","忽视自我"],upDesc:"完美平衡了物质成就和生活品质。",revDesc:"在照顾他人过程中忽视了自己。",love:"创造温暖舒适的家。",work:"高效务实地管理资源。",advice:"最好的照顾是首先照顾好自己。",revLove:"你为家庭付出太多却忘了自己，这样下去会崩溃的。",revWork:"过度操劳身体在报警了，再忙也要照顾自己。",revAdvice:"你不是取之不尽的泉水，枯竭之前先给自己充电。"},
+{up:["财富","成功","商业头脑"],rev:["贪婪","守财奴"],upDesc:"物质世界的绝对掌控者。多年智慧和勤奋带来了财富和地位。",revDesc:"对金钱的过度追求让你失去了更重要的东西。",love:"提供安全稳定的感情环境。",work:"商业直觉和管理能力在巅峰。",advice:"真正的富有是你能自由选择用时间做什么。",revLove:"你用金钱代替了陪伴，伴侣要的不是你的钱而是你的心。",revWork:"对利润的过度追求让你失去了初心和人心。",revAdvice:"钱买不到的东西才是最珍贵的，别等失去了才明白。"}
+];
+
+const wands = genMinor('wands','权杖',22,wandsKw);
+const cups = genMinor('cups','圣杯',36,cupsKw);
+const swords = genMinor('swords','宝剑',50,swordsKw);
+const pentacles = genMinor('pentacles','星币',64,pentaclesKw);
+const allCards = [...majorArcana,...wands,...cups,...swords,...pentacles];
+// ===== SPREAD DEFINITIONS =====
+const spreads = {
+    single:{name:"每日一卡",count:1,meanings:["今日指引"],layout:"single"},
+    three:{name:"时间之流",count:3,meanings:["过去","现在","未来"],layout:"three"},
+    cross:{name:"十字牌阵",count:5,meanings:["当前处境","面临挑战","潜意识根源","建议行动","可能结果"],layout:"cross"},
+    relationship:{name:"关系牌阵",count:5,meanings:["你的状态","对方状态","关系现状","核心挑战","未来发展"],layout:"relationship"},
+    hexagram:{name:"六芒星阵",count:7,meanings:["过去","近期未来","潜意识","意识层面","更高指引","近期影响","最终结果"],layout:"hexagram"},
+    celtic:{name:"凯尔特十字",count:10,meanings:["现状核心","直接挑战","潜意识基础","近期过去","最高理想","近期未来","你的态度","外在环境","希望与恐惧","最终结果"],layout:"celtic"}
+};
+
+// ===== STATE =====
+let deckType='major',currentSpread=null,deck=[],drawn=[],shuffled=false,drawIdx=0;
+let soundOn=false,audioCtx=null,bgOscillators=[];
+
+// ===== NAVIGATION =====
+function showHome(){
+    document.getElementById('homePage').classList.remove('hidden');
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+}
+function showHistory(){
+    document.getElementById('homePage').classList.add('hidden');
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('historyPage').classList.add('active');
+    renderHistory();
+}
+function setDeck(type){
+    deckType=type;
+    document.getElementById('deckMajor').classList.toggle('active',type==='major');
+    document.getElementById('deckFull').classList.toggle('active',type==='full');
+}
+
+// ===== SOUND ENGINE =====
+function initAudio(){if(audioCtx)return;audioCtx=new(window.AudioContext||window.webkitAudioContext)();}
+function startAmbientSound(){
+    initAudio();if(bgOscillators.length>0)return;
+    const mg=audioCtx.createGain();mg.gain.value=0.06;mg.connect(audioCtx.destination);
+    [110,146.83,164.81,220].forEach((f,i)=>{
+        const o=audioCtx.createOscillator(),g=audioCtx.createGain(),fl=audioCtx.createBiquadFilter();
+        o.type='sine';o.frequency.value=f;fl.type='lowpass';fl.frequency.value=400;fl.Q.value=1;
+        g.gain.value=0;g.gain.linearRampToValueAtTime(0.15,audioCtx.currentTime+3+i);
+        o.connect(fl);fl.connect(g);g.connect(mg);o.start();bgOscillators.push({osc:o,gain:g,filter:fl});
+    });
+    const lfo=audioCtx.createOscillator(),lg=audioCtx.createGain();
+    lfo.type='sine';lfo.frequency.value=0.08;lg.gain.value=15;lfo.connect(lg);
+    bgOscillators.forEach(o=>{if(o.filter)lg.connect(o.filter.frequency)});lfo.start();
+    bgOscillators.push({osc:lfo,gain:lg});
+    [329.63,440,523.25].forEach((f,i)=>{
+        const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=f;g.gain.value=0;
+        function cy(){const n=audioCtx.currentTime;g.gain.cancelScheduledValues(n);g.gain.setValueAtTime(0,n);
+            g.gain.linearRampToValueAtTime(0.03,n+4+i*2);g.gain.linearRampToValueAtTime(0,n+8+i*2);
+            setTimeout(cy,(10+i*3)*1000);}
+        o.connect(g);g.connect(mg);o.start();cy();bgOscillators.push({osc:o,gain:g});
+    });
+    function chime(){if(!soundOn)return;const f=[523.25,659.25,783.99,1046.5][Math.floor(Math.random()*4)];
+        const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=f;g.gain.value=0;
+        g.gain.linearRampToValueAtTime(0.02,audioCtx.currentTime+0.1);
+        g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+4);
+        o.connect(g);g.connect(mg);o.start();o.stop(audioCtx.currentTime+4);
+        setTimeout(chime,5000+Math.random()*10000);}
+    setTimeout(chime,3000);
+}
+function stopAmbientSound(){bgOscillators.forEach(o=>{try{if(o.gain&&o.gain.gain)o.gain.gain.linearRampToValueAtTime(0,audioCtx.currentTime+1);setTimeout(()=>{try{o.osc.stop()}catch(e){}},1500)}catch(e){}});bgOscillators=[];}
+function playSfx(type){
+    if(!soundOn||!audioCtx)return;const g=audioCtx.createGain();g.connect(audioCtx.destination);
+    if(type==='shuffle'){const bs=audioCtx.sampleRate*0.15,b=audioCtx.createBuffer(1,bs,audioCtx.sampleRate),d=b.getChannelData(0);for(let i=0;i<bs;i++)d[i]=(Math.random()*2-1)*0.3;const s=audioCtx.createBufferSource(),f=audioCtx.createBiquadFilter();f.type='bandpass';f.frequency.value=3000;s.buffer=b;g.gain.value=0.08;g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.3);s.connect(f);f.connect(g);s.start();s.stop(audioCtx.currentTime+0.3);}
+    else if(type==='flip'){const o=audioCtx.createOscillator();o.type='sine';o.frequency.value=800;o.frequency.exponentialRampToValueAtTime(1200,audioCtx.currentTime+0.05);g.gain.value=0.06;g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.3);o.connect(g);o.start();o.stop(audioCtx.currentTime+0.3);}
+    else if(type==='complete'){[523.25,659.25,783.99].forEach((f,i)=>{const o=audioCtx.createOscillator(),gg=audioCtx.createGain();o.type='sine';o.frequency.value=f;gg.gain.value=0;gg.gain.linearRampToValueAtTime(0.04,audioCtx.currentTime+0.1+i*0.15);gg.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+1.5+i*0.15);o.connect(gg);gg.connect(audioCtx.destination);o.start(audioCtx.currentTime+i*0.15);o.stop(audioCtx.currentTime+2);});}
+}
+function toggleSound(){soundOn=!soundOn;const b=document.getElementById('soundToggle');b.textContent=soundOn?'🔊':'🔇';b.classList.toggle('active',soundOn);if(soundOn){initAudio();startBGM();}else{stopBGM();}}
+// ===== READING =====
+function shuffleArray(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}}
+// ===== 牌义图鉴 =====
+var currentFilter = 'all';
+
+function showEncyclopedia(){
+    document.getElementById('homePage').classList.add('hidden');
+    document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+    document.getElementById('encyclopediaPage').classList.add('active');
+    document.getElementById('encyclopediaPage').classList.add('page-enter');
+    filterEncy('all');
+}
+
+function filterEncy(type){
+    currentFilter = type;
+    var btns = document.querySelectorAll('.ency-filter');
+    btns.forEach(function(b){b.classList.remove('active');});
+    var labels = {'all':'全部','major':'大阿卡纳','wands':'权杖','cups':'圣杯','swords':'宝剑','pentacles':'星币'};
+    btns.forEach(function(b){if(b.textContent.indexOf(labels[type])>=0) b.classList.add('active');});
+
+    var cards = [];
+    if(type==='all') cards = allCards;
+    else if(type==='major') cards = majorArcana;
+    else if(type==='wands') cards = wands;
+    else if(type==='cups') cards = cups;
+    else if(type==='swords') cards = swords;
+    else if(type==='pentacles') cards = pentacles;
+
+    var grid = document.getElementById('encyGrid');
+grid.innerHTML = cards.map(function(c){
+    return '<div class="ency-card" onclick="showEncyDetail('+c.id+')">'+
+        '<div class="ency-card-img" data-cid="'+c.id+'"></div>'+
+        '<div class="ency-card-name">'+c.name+'</div>'+
+        '<div class="ency-card-en">'+c.en+'</div></div>';
+}).join('');
+var imgDivs = grid.querySelectorAll('.ency-card-img');
+for (var i = 0; i < imgDivs.length; i++) {
+    fillCardImg(imgDivs[i], parseInt(imgDivs[i].getAttribute('data-cid')));
+}
+}
+
+function getSuitName(id){
+    if(id<22) return '大阿卡纳 Major Arcana';
+    if(id<36) return '权杖牌组 Suit of Wands';
+    if(id<50) return '圣杯牌组 Suit of Cups';
+    if(id<64) return '宝剑牌组 Suit of Swords';
+    return '星币牌组 Suit of Pentacles';
+}
+
+function getCardNumber(id){
+    if(id<22) return '编号 '+id;
+    var inSuit = (id-22)%14;
+    var ranks = ['王牌(Ace)','二','三','四','五','六','七','八','九','十','侍从(Page)','骑士(Knight)','王后(Queen)','国王(King)'];
+    return ranks[inSuit];
+}
+
+function showEncyDetail(id){
+    var card = allCards.find(function(c){return c.id===id;});
+    if(!card) return;
+    var imgUrl = getCardImageUrl(card.id);
+    var html = '';
+
+    // 头部：图片 + 基本信息
+    html += '<div class="ency-detail-header">';
+    html += '<div class="ency-detail-img" id="encyDetailImg"></div>';
+    html += '<div class="ency-detail-info">';
+    html += '<div class="ency-detail-name">'+card.name+'</div>';
+    html += '<div class="ency-detail-en">'+card.en+'</div>';
+    html += '<div class="ency-detail-id">'+getSuitName(card.id)+' · '+getCardNumber(card.id)+'</div>';
+
+    // 正位关键词
+    html += '<div class="ency-kw-section">';
+    html += '<div class="ency-kw-label up">☀ 正位关键词</div>';
+    html += '<div class="ency-kw-tags">';
+    card.upright.forEach(function(k){html += '<span class="ency-kw-tag up">'+k+'</span>';});
+    html += '</div></div>';
+
+    // 逆位关键词
+    html += '<div class="ency-kw-section">';
+    html += '<div class="ency-kw-label rev">☽ 逆位关键词</div>';
+    html += '<div class="ency-kw-tags">';
+    card.reversed.forEach(function(k){html += '<span class="ency-kw-tag rev">'+k+'</span>';});
+    html += '</div></div>';
+
+    html += '</div></div>';
+
+    // 正位详解
+    html += '<div class="ency-section">';
+    html += '<div class="ency-section-title">☀ 正位牌意详解</div>';
+    html += '<div class="ency-section-text">'+card.uprightDesc+'</div>';
+    html += '</div>';
+
+    // 逆位详解
+    html += '<div class="ency-section">';
+    html += '<div class="ency-section-title">☽ 逆位牌意详解</div>';
+    html += '<div class="ency-section-text">'+card.reversedDesc+'</div>';
+    html += '</div>';
+
+    // 感情方面
+    if(card.love){
+        html += '<div class="ency-section">';
+        html += '<div class="ency-section-title">♡ 感情指引</div>';
+        html += '<div class="ency-section-text">'+card.love+'</div>';
+        html += '</div>';
+    }
+
+    // 事业方面
+    if(card.work){
+        html += '<div class="ency-section">';
+        html += '<div class="ency-section-title">☆ 事业指引</div>';
+        html += '<div class="ency-section-text">'+card.work+'</div>';
+        html += '</div>';
+    }
+
+    // 综合建议
+    if(card.advice){
+        html += '<div class="ency-section">';
+        html += '<div class="ency-section-title">✧ 综合建议</div>';
+        html += '<div class="ency-section-text">'+card.advice+'</div>';
+        html += '</div>';
+    }
+
+    // 象征解读（给大阿卡纳加额外的深度内容）
+   // 象征解读（大阿卡纳专属）
+var symbolism = getDeepSymbolism(card.id);
+if(symbolism){
+    html += '<div class="ency-section">';
+    html += '<div class="ency-section-title">🔮 深度象征解读</div>';
+    html += '<div class="ency-section-text">'+symbolism+'</div>';
+    html += '</div>';
+}
+// 灵性启示（所有牌）
+var spiritual = getSpiritualMeaning(card.id);
+if(spiritual){
+    html += '<div class="ency-section">';
+    html += '<div class="ency-section-title">✦ 灵性启示</div>';
+    html += '<div class="ency-section-text">'+spiritual+'</div>';
+        html += '</div>';
+    }
+
+    document.getElementById('encyDetailContent').innerHTML = html;
+    fillCardImg(document.getElementById('encyDetailImg'), card.id);
+    document.getElementById('encyDetailModal').classList.add('active');
+}
+
+function closeEncyDetail(){document.getElementById('encyDetailModal').classList.remove('active');}
+// 大阿卡纳深度象征
+function getDeepSymbolism(id){
+    var data = {
+        0:"愚者脚边的悬崖象征着未知的飞跃。白色的玫瑰代表纯真与对美的渴望，手中的小包袱是过去的经验——轻便而不拖累。小白狗既是忠诚的伙伴，也象征着本能的直觉在提醒他注意脚下。编号0意味着他既在起点，也在终点，是整个愚者旅程的开端与归宿。山峰代表着他即将面对的精神考验。",
+        1:"魔术师头顶的无限符号(∞)代表他连接了无限的宇宙能量。高举的权杖将天上的灵感引导到地上的现实。桌上的四件工具——权杖(火)、圣杯(水)、宝剑(风)、星币(土)象征四大元素已备齐。红色长袍代表行动的意志，白色内袍象征内心的纯净。他是天与地之间的桥梁，将想法显化为现实。",
+        2:"女祭司坐在两根柱子之间——黑柱(Boaz)代表否定与神秘，白柱(Jachin)代表肯定与光明。她手中的卷轴是更高智慧的象征，半隐于斗篷之下意味着真相不会轻易示人。脚下的新月代表直觉与潜意识。身后的帷幕绣满石榴——象征丰饶与生命之谜。她是未显化的潜能与神秘知识的守护者。",
+        3:"皇后周围繁茂的花园象征生命力与丰饶。心形盾牌上的金星(♀)符号代表爱与美。她头戴的十二星辰冠冕象征着与自然周期的连接。流水代表情感的自由流动，麦穗象征丰收和滋养。她是大地母亲的化身，提醒我们生命本身就是最大的创造。坐垫上的红色代表激情和感官享受。",
+        4:"皇帝端坐在石头王座上，代表稳固不可动摇的权威。四个公羊头装饰象征白羊座——行动力和领导力。他手持权杖(生命力)和金球(世界的掌控)。盔甲之下穿着红袍，说明他的权力建立在行动和意志之上。荒芜的山脉暗示他选择了秩序与结构而非柔软与自然。他的数字4代表稳定、方向和基础。",
+        5:"教皇坐在两名信徒之间，代表着精神权威和传统教导。他举起右手做祝福手势，两根手指指天两根指地，象征连接灵性世界与物质世界。三层冠冕代表身、心、灵三个层面的统治。交叉钥匙象征打开意识与潜意识之门的能力。他是传承智慧的桥梁，也代表既定秩序和集体信仰。",
+        6:"恋人牌中天使的祝福代表更高力量对这段连接的认可。男人望向女人，女人望向天使，暗示着灵魂通过爱走向神性。生命之树和知识之树分别在两人身后，象征选择的永恒主题——是跟随本能还是追求智慧？蛇的出现提醒这是一个有代价的选择。这张牌的核心不仅是爱情，更是价值观的抉择。",
+        7:"战车的两匹斯芬克斯一黑一白，代表需要驾驭的对立力量——理性与感性、光明与黑暗。没有缰绳，意味着驾驭靠的不是外力控制，而是内在意志。星辰华盖代表宇宙的庇护，方形胸甲象征坚定的意志。城市在身后渐远——他已经超越了舒适区。翅膀般的日月标志暗示精神力量支撑着物质世界的前进。",
+        8:"力量牌中女子温柔地抚摸狮子的画面，是这张牌最核心的教导。狮子代表我们内心的原始欲望、愤怒和恐惧。女子没有用铁链和棍棒，而是用无限的温柔与耐心化解了野性。她头顶的无限符号与魔术师相同，暗示真正的力量源于与无限宇宙的连接。花环链接着两个存在，象征爱可以驯服一切。",
+        9:"隐士站在雪山之巅，独自持灯。灯中的六芒星是所罗门之星，象征智慧之光。灰色斗篷代表中立和隐匿——他选择退出世俗的纷争。手杖不仅用于行走，更代表内在权威。他是愚者旅途中最安静的一站——在这里，外在的冒险暂停，内在的探索开始。山顶代表精神成就的高度，但他仍在前行。",
+        10:"命运之轮上的四个角落分别是金牛(土)、狮子(火)、天鹰(水)、天使(风)，对应四大元素和四福音。轮上的三个生物代表上升(蛇/赛特)、下降(阿努比斯)、和超越(斯芬克斯)的三种力量。轮边的字母TARO可以环形阅读为TARO-ROTA-ORAT-TORA，暗示塔罗本身就是命运之轮的映射。",
+        11:"正义手持天秤与宝剑。天秤代表公平衡量一切，宝剑代表执行判决的力量和清晰的判断。她的紫色帷幕与女祭司相呼应——正义也有神秘和直觉的面向。一只脚微微露出长袍，暗示真相终将显现。方形的王冠代表有序的思维。在因果法则中，每一个选择都会带来相应的后果——不是惩罚，而是平衡。",
+        12:"倒吊人被绑在活的T型十字架(Tau Cross)上，树上长出新叶象征这种牺牲带来了新生。他的表情是平静甚至喜悦的——这不是被迫的困境，而是主动的选择。头周围的金色光环暗示他在这个颠倒的视角中获得了启示。交叉的双腿形成数字4——在不稳定中创造了稳定。这张牌教导我们：有时候投降就是最大的力量。",
+        13:"死神骑在白马上——白色代表纯净，暗示死亡本身是中性的净化力量。倒下的国王说明死亡面前众生平等。远方的双塔之间有一轮初升的太阳——最有力的重生象征。地上的花朵提醒我们生命是一个循环。旗帜上的白玫瑰是生命力和美的象征。死神的盔甲说明他不可被打败，但他带来的是必要的转变而非毁灭。",
+        14:"节制天使一脚在水中(潜意识)一脚在地上(意识)，完美连接两个世界。从一个杯子倒向另一个的水代表灵魂能量的流动与平衡。远方的金色王冠代表通过平衡达到的精神成就。胸前的三角形中的方形象征灵性(三)包含并超越物质(四)。鸢尾花象征希望与净化。这是炼金术中'伟大工作'的视觉化呈现。",
+        15:"恶魔的火炬是倒转的——象征对神圣之光的扭曲和滥用。锁链松松地挂在两个人形身上，意味着他们随时可以选择离开，却被自己的欲望和恐惧绑住。恶魔头上的倒五芒星代表物质凌驾于精神。角和翅膀是对教皇的暗黑镜像。这张牌最深的教导是：大多数囚笼都没有上锁，是我们自己选择待在里面。",
+        16:"闪电击中塔的王冠——虚假的权威和自我被真相的力量摧毁。从塔上坠落的两个人代表从虚假信念中被解放(虽然过程痛苦)。22滴火焰代表希伯来文的22个字母，也对应22张大阿卡纳——整个生命的课题在这一刻被重新洗牌。黑暗的背景中，闪电本身就是唯一的光源——有时候毁灭性的真相是最好的照明。",
+        17:"星星牌中女子跪在水边，将水同时倒入池中(潜意识)和大地(物质世界)，象征灵感同时滋养内在和外在。天上八颗星——一颗大星被七颗小星围绕，大星代表核心的灵魂之光，七颗小星对应七个脉轮。她完全裸露代表在宇宙面前毫无隐藏的真实。背景中的鸟(朱鹭)是古埃及智慧之神透特的象征。这是暴风雨后最宁静的疗愈。",
+        18:"月亮照耀着一条从水中蜿蜒到远方山脉的道路——这是潜意识到意识的旅程。龙虾从水中爬出象征最深层恐惧的浮现。狗和狼分别代表驯化的本能和野性的本能，两者在月光下同时嚎叫。双塔标记着已知与未知的边界。水面的波动暗示情绪的不稳定。月亮只反射太阳的光——提醒我们眼前所见可能只是幻象而非真相。",
+        19:"太阳牌中赤裸的孩子骑在白马上，代表纯真、自由和与生俱来的喜悦。向日葵面朝观者而非太阳——暗示你自己就是光源。红色旗帜象征行动力和生命力的全面复苏。石墙代表已经克服的障碍(塔牌的废墟被重建)。太阳放射的直线和曲线代表理性之光和感性温暖的完美融合。这是整副牌中最积极的能量。",
+        20:"审判中天使吹响号角——这是灵魂的觉醒之号。从棺材中站起来的人们代表从旧生活中重生，赤裸意味着放下了一切伪装。十字旗帜代表四大元素的整合与平衡。蓝灰色的山脉代表已经翻越的精神考验。男人、女人、孩子代表意识、潜意识和更新的自我。这不是终末审判，而是灵魂对自己一生旅程的清醒回顾和整合。",
+        21:"世界牌中央的舞者被月桂花环围绕——胜利与完成的象征。她手持两根权杖代表平衡了给予和接受、上升和下降的力量。四角的生物与命运之轮相同，但这一次它们不再转动——稳定的觉知已经达成。花环形成的椭圆形是宇宙之蛋，象征无限的可能。紫色丝带绑成无限符号，回应了魔术师的无限——旅程的终点也是新的起点。",
+        22:"权杖王牌中，一只从云中伸出的手紧握着生机勃勃的木杖——这不是雕琢过的权杖，而是一根活着的、正在发芽的树枝。叶子从木杖上向四面八方生长，象征着创造力的蓬勃爆发。云代表精神世界，手从云中伸出意味着这份灵感是来自更高维度的礼物。远方的城堡象征着这个创意种子最终可以建造的宏伟成就。飘落的叶子既是祝福，也在暗示——灵感虽丰沛，但需要落地才能生根。",
+        23:"权杖二中，一个穿着华服的人站在城堡的露台上，右手握着一根权杖，左手托着一个小地球。他凝望着远方广阔的海洋和山脉。固定在墙上的另一根权杖代表已经拥有的成就和安全感，而手中的地球象征着尚未征服的广阔世界。他站在中间——既不在室内的安全中，也没有踏上旅途。这是决策前最安静的时刻。红色的玫瑰和白色的百合分别代表激情和纯洁，暗示这个选择需要两者的平衡。",
+        24:"权杖三中，一个人背对着我们站在悬崖边，眺望着远方金色的海洋，三艘商船正在航行。他手握的权杖已经稳稳地插在地上，代表基础已经建立。三根权杖形成稳固的三角结构，象征着事业初步成型的稳定。金色的天空暗示丰收的前景。他的红色斗篷象征行动的勇气，而从背后看不到他的表情——因为真正的远见者不需要回头寻求认可，他只需注视前方。",
+        25:"权杖四中，四根权杖<script src="./src/app.js"></script>

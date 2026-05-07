@@ -1,26 +1,17 @@
 # tarot2
 
-这是从 `shie91847-eng/tarot-cards` 迁移/整理出来的新仓库。
+这是 `tarot-cards` 的整理版仓库。
 
-迁移原则：
+原仓库 `shie91847-eng/tarot-cards` 只作为只读来源，没有被修改。
 
-1. 原仓库 `tarot-cards` 只读，不修改、不删除、不覆盖。
-2. 所有整理、拆分、重构只在 `tarot2` 中进行。
-3. 先迁移文本代码，再分批迁移图片资源，避免一次性提交过大导致失败。
-4. 原 `index.html` 体积较大，后续建议拆分为：
-   - `index.html`：页面结构入口
-   - `src/styles.css`：样式
-   - `src/app.js`：交互逻辑
-   - `src/tarot-data.js`：塔罗牌数据
-   - `assets/`：图片资源
+## 结构
 
-当前状态：
+- `index.html`：页面入口
+- `src/styles.css`：样式
+- `src/app.js`：交互逻辑
+- `assets/cards/`：78 张塔罗牌图
+- `assets/audio/bgm.mp3`：背景音乐
 
-- 已确认可访问旧仓库 `tarot-cards`。
-- 已确认 `tarot2` 可写入。
-- 旧仓库保持未改动。
-- 当前 GitHub 工具对大文件内容和图片列表的读取有截断/枚举限制，因此不能安全地直接无损复制完整仓库。
+## 安全说明
 
-推荐下一步：
-
-将旧仓库下载为 ZIP 后上传到 ChatGPT。这样可以在不触碰旧仓库的情况下，完整读取所有代码和图片，再把整理后的版本写入 `tarot2`。
+原项目里曾经硬编码 AI 接口密钥。这个整理版不会继续把旧密钥写死在代码里，而是使用 `window.TAROT_AI_KEY` 作为运行时配置入口。
