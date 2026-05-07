@@ -1,0 +1,109 @@
+name: Migrate tarot-cards into tarot2
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/migrate-tarot.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout tarot2
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Clone source repository read-only
+        run: |
+          rm -rf /tmp/tarot-cards
+          git clone --depth 1 https://github.com/shie91847-eng/tarot-cards.git /tmp/tarot-cards
+
+      - name: Restructure project into tarot2
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import re, shutil
+
+          root = Path('.')
+          src = Path('/tmp/tarot-cards')
+
+          for path in ['src', 'assets']:
+              target = root / path
+              if target.exists():
+                  shutil.rmtree(target)
+
+          (root / 'src').mkdir(parents=True, exist_ok=True)
+          (root / 'assets' / 'cards').mkdir(parents=True, exist_ok=True)
+          (root / 'assets' / 'audio').mkdir(parents=True, exist_ok=True)
+
+          raw = (src / 'index.html').read_text(encoding='utf-8')
+
+          style_match = re.search(r'<style>(.*?)</style>', raw, flags=re.S | re.I)
+          styles = style_match.group(1).strip() if style_match else ''
+
+          script_match = re.search(r'<script>(.*?)</script>\s*</body>', raw, flags=re.S | re.I)
+          script = script_match.group(1).strip() if script_match else ''
+
+          html = raw
+          if style_match:
+              html = html[:style_match.start()] + '<link rel="stylesheet" href="./src/styles.css">' + html[style_match.end():]
+          if script_match:
+              html = html[:script_match.start()] + '<script src="./src/app.js"></script>\n' + html[script_match.end()-7:]
+
+          def rewrite_asset_paths(text: str) -> str:
+              replacements = {
+                  'https://cdn.jsdelivr.net/gh/shie91847-eng/tarot-cards@main/bgm.mp3': './assets/audio/bgm.mp3',
+                  'https://gitee.com/hxy888999/tarot-cards/raw/master/bgm.mp3': './assets/audio/bgm.mp3',
+                  'https://raw.githubusercontent.com/shie91847-eng/tarot-cards/main/bgm.mp3': './assets/audio/bgm.mp3',
+                  'https://cdn.jsdelivr.net/gh/shie91847-eng/tarot-cards@main/': './assets/cards/',
+                  'https://gitee.com/hxy888999/tarot-cards/raw/master/': './assets/cards/',
+                  'https://raw.githubusercontent.com/shie91847-eng/tarot-cards/main/': './assets/cards/',
+              }
+              for old, new in replacements.items():
+                  text = text.replace(old, new)
+              text = text.replace('./assets/cards/bgm.mp3', './assets/audio/bgm.mp3')
+              return text
+
+          html = rewrite_asset_paths(html)
+          styles = rewrite_asset_paths(styles)
+          script = rewrite_asset_paths(script)
+
+          # Do not publish the old hard-coded AI key again. Use a runtime placeholder instead.
+          script = re.sub(r"const\s+AI_KEY\s*=\s*['\"][^'\"]+['\"]\s*;", "const AI_KEY = window.TAROT_AI_KEY || '';", script)
+
+          (root / 'index.html').write_text(html, encoding='utf-8')
+          (root / 'src' / 'styles.css').write_text(styles + '\n', encoding='utf-8')
+          (root / 'src' / 'app.js').write_text(script + '\n', encoding='utf-8')
+
+          for i in range(78):
+              source = src / f'{i}.png'
+              if source.exists():
+                  shutil.copy2(source, root / 'assets' / 'cards' / f'{i}.png')
+              else:
+                  raise FileNotFoundError(f'Missing card image: {i}.png')
+
+          bgm = src / 'bgm.mp3'
+          if bgm.exists():
+              shutil.copy2(bgm, root / 'assets' / 'audio' / 'bgm.mp3')
+
+          (root / 'README.md').write_text('''# tarot2\n\n这是 `tarot-cards` 的整理版仓库。\n\n原仓库 `shie91847-eng/tarot-cards` 只作为只读来源，没有被修改。\n\n## 结构\n\n- `index.html`：页面入口\n- `src/styles.css`：样式\n- `src/app.js`：交互逻辑\n- `assets/cards/`：78 张塔罗牌图\n- `assets/audio/bgm.mp3`：背景音乐\n\n## 安全说明\n\n原项目里曾经硬编码 AI 接口密钥。这个整理版不会继续把旧密钥写死在代码里，而是使用 `window.TAROT_AI_KEY` 作为运行时配置入口。\n''', encoding='utf-8')
+
+          (root / 'MIGRATION_STATUS.md').write_text('''# 迁移完成说明\n\n本仓库由 GitHub Actions 从 `shie91847-eng/tarot-cards` 只读复制并整理生成。\n\n已整理内容：\n\n- 拆分原单文件 `index.html`\n- 复制 78 张 PNG 牌图到 `assets/cards/`\n- 复制 `bgm.mp3` 到 `assets/audio/`\n- 将图片和音乐路径改为本地相对路径\n- 移除公开硬编码 AI 密钥，改为运行时变量\n\n原仓库未被修改。\n''', encoding='utf-8')
+          PY
+
+      - name: Commit migrated project
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html src assets README.md MIGRATION_STATUS.md
+          if git diff --cached --quiet; then
+            echo "No migration changes to commit."
+          else
+            git commit -m "Migrate and restructure tarot project"
+            git push
+          fi
